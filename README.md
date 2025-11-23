@@ -1,4 +1,4 @@
-# TW Drops: Twitch Drops Farmer (So Ugly It Works)
+# TW Drops: Twitch Drops Farmer
 
 Welcome to **TW Drops**, the scrappy Twitch drops farmer that drives a headless Playwright browser for you. It captures cookies, shows account stats, lists active campaigns, fetches live channels, and farms drops in the background — all from a slick control panel. The codebase is a bit of a beautiful disaster, but *if it works, don’t touch it.*
 
