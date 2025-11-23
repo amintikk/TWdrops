@@ -187,6 +187,34 @@
     .progress-text { font-size: 12px; color: var(--muted); display: block; margin-top: 4px; }
     .farming { border-color: var(--success); box-shadow: 0 0 0 1px var(--success); }
     .farming .farm-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background: rgba(110,231,183,0.12); color: var(--success); border:1px solid rgba(110,231,183,0.4); font-size:12px; }
+    @media (max-width: 900px) {
+      header { padding: 16px 18px 10px; }
+      h1 { font-size: 22px; }
+      main { padding: 16px 18px 32px; }
+      .header-row { flex-direction: column; align-items: flex-start; }
+      .profile-switcher { width: 100%; justify-content: flex-start; }
+      .profile-btn { width: 100%; }
+      .profile-menu { width: 100%; max-width: 360px; }
+      .grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .row { gap: 8px; }
+      button { width: auto; }
+      .card { padding: 12px; }
+      .scroll-pane { max-height: none; }
+      #embedImage { max-height: 240px; object-fit: cover; }
+      .profile { grid-template-columns: 64px 1fr; }
+      .avatar { width: 64px; height: 64px; }
+    }
+    @media (max-width: 600px) {
+      body { font-size: 15px; }
+      .row { flex-direction: column; align-items: stretch; }
+      button { width: 100%; }
+      input { width: 100%; }
+      .profile-btn { min-width: 0; }
+      .pill { width: fit-content; }
+      .section-header { flex-direction: column; align-items: flex-start; }
+      .badge, .profile-status { font-size: 11px; }
+    }
   </style>
 </head>
 <body>

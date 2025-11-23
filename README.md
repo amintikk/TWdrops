@@ -1,63 +1,55 @@
-# TWdrops
+# TW Drops: Twitch Drops Farmer (So Ugly It Works)
 
-> Twitch drops farmer with an embedded Playwright browser, profile isolation, and a slick control panel.
+Welcome to **TW Drops**, the scrappy Twitch drops farmer that drives a headless Playwright browser for you. It captures cookies, shows account stats, lists active campaigns, fetches live channels, and farms drops in the background — all from a slick control panel. The codebase is a bit of a beautiful disaster, but *if it works, don’t touch it.*
 
-![Dashboard screenshot](path/to/dashboard.png)
+![Dashboard overview](drops-pannel.png)
+![Profile switcher & cookies](pannel.png)
 
-![Profile switcher](path/to/profile-switcher.png)
+## Why You Might Actually Like This
+- **Embedded browser control**: Click, type, scroll, zoom via the UI; headless Playwright does the heavy lifting.
+- **Cookie capture + stats**: Grab `auth-token`, view Twitch account info (display name, affiliate/partner, created at, bio, avatar).
+- **Drops dashboard**: Active campaigns with progress bars and reward details; auto-fetches live channels for the selected game/drop.
+- **Background farming**: Opens the stream, mutes/plays, queues channels, and keeps running per-profile.
+- **Multi-profile isolation**: Each profile keeps its own Chrome data and cookies; switch/create/delete from the header.
+- **Lightweight auth gate**: First-run register, then login; stored in the data volume so randos can’t just hit your port.
+- **Docker-ready**: Base image includes Playwright/Chromium; mount a volume for persistent cookies/auth.
 
-## Features
-- Embedded, headless Playwright browser you can drive from the UI (click, type, scroll, zoom).
-- Cookie capture and Twitch account stats viewer (display name, partner/affiliate, created at, bio, avatar).
-- Active drops list with reward progress bars; auto-fetch live channels for a selected drop.
-- Background farming: auto-play/mute stream, queue next channels, and keep running even if you switch profiles.
-- Multi-profile support: each profile has its own Chrome data dir and cookie cache; create/delete/switch from the header.
-- Auto-channel helper to pick a live stream for the selected game/drop.
-
-## Requirements
-- Node.js 18+ (or 20+ recommended).
-- Playwright is already in `package-lock`. System packages for Chromium must be available if you containerize (see note below).
-
-## Quick start
+## Quickstart (Local)
 ```bash
 npm install
 npm start
-# server runs on http://localhost:3000
+# open http://localhost:3000
 ```
+First visit will ask you to register a user/pass. After logging in:
+1) Create/select a profile (header).
+2) Open the embedded browser, log into Twitch.
+3) Capture cookies.
+4) Refresh drops, pick a drop/channel, start farming.
 
-Then open the UI in your browser. From there:
-1) Create/select a profile (top-right).  
-2) Open the embedded browser, log into Twitch.  
-3) Capture cookies.  
-4) Refresh drops, pick a drop/channel, and start farming.  
-5) Use Stop farming when you want to halt that profile’s session.
+## Docker (multi-arch image ready)
+Pull & run the published image:
+```bash
+docker run -p 3000:3000 -v twdrops_profile:/app/.twdrops-profile amintikk/twdrops:latest
+```
+Tags: `latest` (rolling) and `v1` (pinned). Both are multi-arch (amd64/arm64). The volume keeps auth, cookies, and profiles.
 
-## Profile data & persistence
-- Profile data and cookies live in `.twdrops-profile/` (default) and subfolders for each profile.
-- Keep this folder if you want to persist sessions across restarts. Mount it as a volume in Docker.
-- Each profile runs its own background farming context; switching profiles does not stop others.
+## Auth & Persistence
+- Auth data and cookies live in `.twdrops-profile/` (or the mounted volume in Docker).
+- On first run, register at `/auth/register`; afterwards use `/auth/login`.
+- The WebSocket is also auth-guarded.
 
-## Environment variables (optional)
-- `TW_CLIENT_INTEGRITY` – client integrity token (if you prefer to inject yours).
-- `TW_DEVICE_ID` – device id override.
-- `TW_CLIENT_ID` – Twitch client id (defaults to `kimne78kx3ncx6brgo4mv6wki5h1ko`).
+## Scripts
+- `npm start` — run server (Express + Playwright + static frontend).
 
-## Docker (in `docker/`)
-Uses the Playwright base image so Chromium dependencies are already present.
-- Build: `docker build -t twdrops -f docker/Dockerfile .`
-- Run: `docker run -p 3000:3000 -v twdrops_profile:/app/.twdrops-profile twdrops`
-- Browse: `http://localhost:3000` (profile data persists in the `twdrops_profile` volume)
+## Known Limitations (a.k.a. The “Code Is Horrible” Section)
+- The code is messy, monolithic, and unapologetically pragmatic.
+- Error handling is “log and shrug” in places.
+- Styling is hand-rolled; responsive tweaks exist but aren’t lovingly crafted.
+- Still, remember the sacred rule: **if it works, don’t touch it.**
 
-## Useful scripts
-- `npm start` – run server (Express + Playwright + static frontend).
+## Disclaimer
+- Use at your own risk. This is not affiliated with Twitch.
+- Respect Twitch ToS and local laws.
+- No warranties; you own the consequences.
 
-## Notes & tips
-- The embedded browser uses a spoofed desktop UA, locale `es-ES`, timezone `Europe/Madrid`, headless.
-- If drops fail to load, re-capture cookies for the active profile.
-- The queue is per-profile; adding channels while farming appends to that profile’s queue.
-
-## Contributing
-PRs welcome. Keep changes ASCII, avoid auto-formatting large files, and mind the multi-profile logic.
-
-## License
-MIT (see LICENSE if present). Feel free to adapt for personal use.
+Happy farming. Or at least, farming that mostly works.
