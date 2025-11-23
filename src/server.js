@@ -42,6 +42,34 @@ let lastViewport = EMBED_VIEWPORT;
 const wsClients = new Set();
 let capturing = false;
 
+async function switchToAvailablePage(reason = "") {
+  if (!browserContext) return;
+  try {
+    const candidate = browserContext
+      .pages()
+      .find((pg) => !pg.isClosed() && pg.url() !== "about:blank");
+    if (candidate) {
+      await setActivePage(candidate);
+      console.log("[login] switched to remaining page", reason || "");
+      return;
+    }
+    if (mainLoginPage && !mainLoginPage.isClosed()) {
+      await setActivePage(mainLoginPage);
+      console.log("[login] reused main login page", reason || "");
+      return;
+    }
+    const fresh = await browserContext.newPage();
+    mainLoginPage = fresh;
+    await setActivePage(fresh);
+    await fresh.goto("https://www.twitch.tv/login?no-mobile-redirect=true", {
+      waitUntil: "domcontentloaded",
+    });
+    console.log("[login] opened new login page", reason || "");
+  } catch (e) {
+    console.log("[login] failed switching page after", reason || "close", e.message);
+  }
+}
+
 async function setActivePage(p) {
   try {
     await p.setViewportSize(EMBED_VIEWPORT);
@@ -241,11 +269,7 @@ async function startEmbeddedLogin() {
       await setActivePage(p);
       p.once("close", async () => {
         // When the popup closes, fall back to any remaining page
-        const remaining = browserContext.pages().find((pg) => !pg.isClosed());
-        if (remaining) {
-          console.log("[login] popup closed, returning to remaining page");
-          await setActivePage(remaining);
-        }
+        await switchToAvailablePage("popup close");
       });
     } catch (e) {
       console.log("[login] error activating new page", e.message);
@@ -253,6 +277,7 @@ async function startEmbeddedLogin() {
   });
 
   mainLoginPage = await browserContext.newPage();
+  mainLoginPage.once("close", () => switchToAvailablePage("main page close"));
   await setActivePage(mainLoginPage);
   await mainLoginPage.goto("https://www.twitch.tv/login?no-mobile-redirect=true", {
     waitUntil: "domcontentloaded",
