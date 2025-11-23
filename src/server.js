@@ -12,7 +12,7 @@ const PROFILE_ROOT = path.join(__dirname, "..", ".twdrops-profile");
 const PROFILES_META_PATH = path.join(PROFILE_ROOT, "profiles.json");
 const DEFAULT_PROFILE_ID = "default";
 
-// Opcionales: inyectar si los tienes de tu navegador
+// Optional: inject these from your own browser if you have them
 const ENV_CLIENT_INTEGRITY = process.env.TW_CLIENT_INTEGRITY || null;
 const ENV_DEVICE_ID = process.env.TW_DEVICE_ID || null;
 const ENV_CLIENT_ID = process.env.TW_CLIENT_ID || "kimne78kx3ncx6brgo4mv6wki5h1ko";
@@ -32,7 +32,7 @@ let integrityExpires = 0;
 let mainLoginPage = null;
 let currentZoom = 1;
 
-const farmSessions = new Map(); // perfilId -> { context, page, channel, queue, inProgress }
+const farmSessions = new Map(); // profileId -> { context, page, channel, queue, inProgress }
 
 const EMBED_VIEWPORT = { width: 1024, height: 576 };
 const FRAME_INTERVAL_MS = 40;
@@ -52,7 +52,7 @@ async function setActivePage(p) {
   lastViewport = EMBED_VIEWPORT;
   stopFrameCapture();
   startFrameCapture();
-  console.log("[login] page activa actualizada");
+  console.log("[login] active page updated");
 }
 
 function summarizeCookies(cookies) {
@@ -91,7 +91,7 @@ function removeProfileDir(profileId) {
     try {
       fs.rmSync(dir, { recursive: true, force: true });
     } catch (e) {
-      console.log("[profiles] error eliminando carpeta de perfil", profileId, e.message);
+      console.log("[profiles] error removing profile folder", profileId, e.message);
     }
   }
 }
@@ -104,7 +104,7 @@ function loadCachedCookiesFromDisk(profileId = activeProfileId) {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
-    console.log("[cookies] error leyendo cache", e.message);
+    console.log("[cookies] error reading cache", e.message);
     return [];
   }
 }
@@ -143,7 +143,7 @@ function bootstrapProfiles() {
     profiles = [
       {
         id: DEFAULT_PROFILE_ID,
-        name: "Perfil 1",
+        name: "Profile 1",
         createdAt: Date.now(),
         lastUsed: Date.now(),
       },
@@ -153,7 +153,7 @@ function bootstrapProfiles() {
   } else {
     profiles = stored.profiles.map((p, idx) => ({
       id: p.id || `profile-${idx + 1}`,
-      name: p.name || `Perfil ${idx + 1}`,
+      name: p.name || `Profile ${idx + 1}`,
       createdAt: p.createdAt || Date.now(),
       lastUsed: p.lastUsed || Date.now(),
     }));
@@ -166,14 +166,14 @@ function bootstrapProfiles() {
   profiles.forEach((p) => ensureDir(getProfileDir(p.id)));
   cachedCookies = loadCachedCookiesFromDisk(activeProfileId);
   if (cachedCookies.length) {
-    console.log("[cookies] cache cargada para perfil", activeProfileId, cachedCookies.length);
+    console.log("[cookies] cookie cache loaded for profile", activeProfileId, cachedCookies.length);
   }
 }
 
 async function setActiveProfile(id) {
   const profile = profiles.find((p) => p.id === id);
   if (!profile) {
-    throw new Error("Perfil no encontrado.");
+    throw new Error("Profile not found.");
   }
   if (id === activeProfileId) {
     return summarizeCookies(cachedCookies);
@@ -236,19 +236,19 @@ async function startEmbeddedLogin() {
   browserProfileId = activeProfileId;
 
   browserContext.on("page", async (p) => {
-    console.log("[login] nueva page detectada (popup/login externo)");
+    console.log("[login] new page detected (popup/external login)");
     try {
       await setActivePage(p);
       p.once("close", async () => {
-        // Al cerrar popup, volver a una pagina existente si queda alguna
+        // When the popup closes, fall back to any remaining page
         const remaining = browserContext.pages().find((pg) => !pg.isClosed());
         if (remaining) {
-          console.log("[login] popup cerrado, volviendo a pagina restante");
+          console.log("[login] popup closed, returning to remaining page");
           await setActivePage(remaining);
         }
       });
     } catch (e) {
-      console.log("[login] error al activar nueva page", e.message);
+      console.log("[login] error activating new page", e.message);
     }
   });
 
@@ -257,7 +257,7 @@ async function startEmbeddedLogin() {
   await mainLoginPage.goto("https://www.twitch.tv/login?no-mobile-redirect=true", {
     waitUntil: "domcontentloaded",
   });
-  console.log("[login] contexto embebido creado con", executablePath, "perfil", activeProfileId);
+  console.log("[login] embedded context created with", executablePath, "profile", activeProfileId);
 }
 
 function getFarmState(profileId = activeProfileId) {
@@ -288,7 +288,7 @@ async function ensureContextForFarm(profileId = activeProfileId) {
     executablePath,
   });
   farmSessions.set(profileId, state);
-  console.log("[farm] contexto de fondo creado", executablePath, "perfil", profileId);
+  console.log("[farm] background context created", executablePath, "profile", profileId);
   return state.context;
 }
 
@@ -300,7 +300,7 @@ async function stopEmbeddedSession() {
     try {
       await page.close();
     } catch (e) {
-      console.log("[stop] error cerrando page", e.message);
+      console.log("[stop] error closing page", e.message);
     }
   }
   page = null;
@@ -308,17 +308,17 @@ async function stopEmbeddedSession() {
     try {
       await browserContext.close();
     } catch (e) {
-      console.log("[stop] error cerrando contexto", e.message);
+      console.log("[stop] error closing context", e.message);
     }
   }
   browserContext = null;
   browserProfileId = null;
-  console.log("[stop] sesion embebida detenida");
+  console.log("[stop] embedded session stopped");
 }
 
 async function captureCookies() {
   if (!browserContext) {
-    throw new Error("No hay sesion de navegador abierta.");
+    throw new Error("No browser session is open.");
   }
   cachedCookies = await browserContext.cookies();
   try {
@@ -329,9 +329,9 @@ async function captureCookies() {
       profile.lastUsed = Date.now();
       saveProfilesMeta();
     }
-    console.log("[cookies] cache guardada", cachedCookies.length, "perfil", activeProfileId);
+    console.log("[cookies] cache saved", cachedCookies.length, "profile", activeProfileId);
   } catch (e) {
-    console.log("[cookies] error guardando cache", e.message);
+    console.log("[cookies] error saving cache", e.message);
   }
   return summarizeCookies(cachedCookies);
 }
@@ -339,7 +339,7 @@ async function captureCookies() {
 function startFrameCapture() {
   stopFrameCapture();
   frameLoop = setTimeout(frameTick, FRAME_INTERVAL_MS);
-  console.log("[frame] captura iniciada");
+  console.log("[frame] capture started");
 }
 
 async function frameTick() {
@@ -361,7 +361,7 @@ async function frameTick() {
       lastViewport = vp;
       broadcastFrame(lastFrame, lastViewport);
     } catch (e) {
-      console.log("[frame] error capturando frame", e.message);
+      console.log("[frame] error capturing frame", e.message);
     } finally {
       capturing = false;
     }
@@ -373,7 +373,7 @@ function stopFrameCapture() {
   if (frameLoop) {
     clearTimeout(frameLoop);
     frameLoop = null;
-    console.log("[frame] captura detenida");
+    console.log("[frame] capture stopped");
   }
   capturing = false;
 }
@@ -445,27 +445,27 @@ async function ensureIntegrityToken(token, clientId, deviceId) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`No se pudo obtener Client-Integrity (${res.status}): ${text}`);
+    throw new Error(`Could not fetch Client-Integrity (${res.status}): ${text}`);
   }
 
   const data = await res.json();
   const tokenValue = data?.token;
   if (!tokenValue) {
-    throw new Error("Respuesta de integrity sin token.");
+    throw new Error("Integrity response did not include a token.");
   }
   integrityToken = tokenValue;
   integrityExpires = Date.now() + (data?.expiration || 20 * 60 * 1000);
-  console.log("[integrity] nuevo token obtenido, expira en ms:", integrityExpires - Date.now());
+  console.log("[integrity] new token obtained, expires in ms:", integrityExpires - Date.now());
   return integrityToken;
 }
 
 async function fetchAccountStats() {
   if (!cachedCookies.length) {
-    throw new Error("No hay cookies capturadas aun.");
+    throw new Error("No cookies captured yet.");
   }
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Falta la cookie auth-token. Inicia sesion y captura de nuevo.");
+    throw new Error("Missing auth-token cookie. Sign in and capture again.");
   }
 
   const validateRes = await fetch("https://id.twitch.tv/oauth2/validate", {
@@ -478,7 +478,7 @@ async function fetchAccountStats() {
 
   if (!validateRes.ok) {
     const text = await validateRes.text();
-    throw new Error(`Token invalido (${validateRes.status}). Repite login/captura. Respuesta: ${text}`);
+    throw new Error(`Invalid token (${validateRes.status}). Sign in again and recapture. Response: ${text}`);
   }
 
   const validate = await validateRes.json();
@@ -507,14 +507,14 @@ async function fetchAccountStats() {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Twitch devolvio ${res.status}: ${text}`);
+    throw new Error(`Twitch responded ${res.status}: ${text}`);
   }
 
   const data = await res.json();
   const user = data?.data?.currentUser;
   if (!user) {
-    const errors = data?.errors ? JSON.stringify(data.errors) : "sin detalles";
-    throw new Error(`No se pudo obtener el usuario. Comprueba login/cookies. Errores: ${errors}`);
+    const errors = data?.errors ? JSON.stringify(data.errors) : "no details";
+    throw new Error(`Could not fetch the user. Check your login/cookies. Errors: ${errors}`);
   }
 
   return {
@@ -532,11 +532,11 @@ async function fetchAccountStats() {
 
 async function fetchActiveDrops() {
   if (!cachedCookies.length) {
-    throw new Error("No hay cookies capturadas aun.");
+    throw new Error("No cookies captured yet.");
   }
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Falta auth-token. Repite login/captura.");
+    throw new Error("Missing auth-token. Please log in and capture again.");
   }
 
   const validateRes = await fetch("https://id.twitch.tv/oauth2/validate", {
@@ -549,13 +549,13 @@ async function fetchActiveDrops() {
   if (!validateRes.ok) {
     const text = await validateRes.text();
     console.log("[drops] validate error", validateRes.status, text);
-    throw new Error("Token invalido, repite captura.");
+    throw new Error("Invalid token; capture cookies again.");
   }
   const validate = await validateRes.json();
   const clientId = ENV_CLIENT_ID || validate.client_id || "kimne78kx3ncx6brgo4mv6wki5h1ko";
   const device = getDeviceIdOrGenerate();
   const integrity = await ensureIntegrityToken(token, clientId, device);
-  console.log("[drops] token validado, clientId:", clientId, "device:", device, "integrity:", Boolean(integrity));
+  console.log("[drops] token validated, clientId:", clientId, "device:", device, "integrity:", Boolean(integrity));
 
   const headers = {
     Authorization: `OAuth ${token}`,
@@ -586,7 +586,7 @@ async function fetchActiveDrops() {
     return json;
   };
 
-  // 1) Persisted query "Inventory" que devuelve dropCampaignsInProgress
+  // 1) Persisted query "Inventory" that returns dropCampaignsInProgress
   try {
     const gqlBody = {
       operationName: "Inventory",
@@ -615,11 +615,11 @@ async function fetchActiveDrops() {
           })) || [];
         return {
         id: c.id,
-        name: c.name || "Campana",
-        game: c.game?.name || c.game?.displayName || c.game?.id || "Juego",
+        name: c.name || "Campaign",
+        game: c.game?.name || c.game?.displayName || c.game?.id || "Game",
         gameId: c.game?.id || null,
         gameName: c.game?.name || c.game?.displayName || null,
-        status: c.status || "ACTIVA",
+        status: c.status || "ACTIVE",
         startAt: c.startAt || null,
         endAt: c.endAt || null,
         benefits,
@@ -636,10 +636,10 @@ async function fetchActiveDrops() {
     });
     }
   } catch (e) {
-    console.log("[drops] fallo Inventory hash", e.message);
+    console.log("[drops] Inventory hash failed", e.message);
   }
 
-  // 2) Persisted query de campanas disponibles
+  // 2) Persisted query for available campaigns
   try {
     const gqlBody = {
       operationName: "DropsHighlightService_AvailableDropCampaigns",
@@ -672,12 +672,12 @@ async function fetchActiveDrops() {
           })) || [];
         return {
         id: c.id,
-        name: c.name || c.displayName || c.statusText || "Campana",
-        game: c.game?.name || c.game?.displayName || c.game?.id || "Juego",
+        name: c.name || c.displayName || c.statusText || "Campaign",
+        game: c.game?.name || c.game?.displayName || c.game?.id || "Game",
         gameId: c.game?.id || null,
         gameName: c.game?.name || c.game?.displayName || null,
         gameSlug: c.game?.slug || null,
-        status: c.status || c.state || "ACTIVA",
+        status: c.status || c.state || "ACTIVE",
         startAt: c.start_at || c.startAt || c.startTime || null,
         endAt: c.end_at || c.endAt || c.endTime || null,
         benefits,
@@ -687,7 +687,7 @@ async function fetchActiveDrops() {
     });
     }
   } catch (e) {
-    console.log("[drops] fallo persisted drops", e.message);
+    console.log("[drops] persisted drops failed", e.message);
   }
 
   // 3) Helix inventory como ultimo recurso
@@ -709,8 +709,8 @@ async function fetchActiveDrops() {
         return data.map((d) => ({
           id: d.id || d.campaign_id || "drop",
           name: d.name || d.benefit_id || "Drop",
-          game: d.game_name || d.game_id || "Juego",
-          status: d.status || "ACTIVO",
+          game: d.game_name || d.game_id || "Game",
+          status: d.status || "ACTIVE",
           startAt: d.unlocked_at || null,
           endAt: d.expires_at || null,
           benefits: [],
@@ -722,11 +722,11 @@ async function fetchActiveDrops() {
       console.log("[drops] helix status", dropsRes.status, text);
     }
   } catch (e) {
-    console.log("[drops] fallo helix inventory", e.message);
+    console.log("[drops] helix inventory failed", e.message);
   }
 
   throw new Error(
-    "No se encontraron campanas de drops. Revisa los logs del servidor para ver los pasos fallidos."
+    "No drop campaigns were found. Check the server logs to see which steps failed."
   );
 }
 
@@ -734,17 +734,17 @@ app.post("/api/drops/channels", async (req, res) => {
   try {
     const { gameSlug, gameName } = req.body || {};
     if (!gameSlug && !gameName) {
-      return res.status(400).json({ ok: false, error: "Falta gameSlug o gameName." });
+      return res.status(400).json({ ok: false, error: "Missing gameSlug or gameName." });
     }
     const token = getAuthToken();
     if (!token) {
-      return res.status(400).json({ ok: false, error: "No hay auth-token." });
+      return res.status(400).json({ ok: false, error: "auth-token cookie not found." });
     }
     const validateRes = await fetch("https://id.twitch.tv/oauth2/validate", {
       headers: { Authorization: `OAuth ${token}` },
     });
     if (!validateRes.ok) {
-      return res.status(400).json({ ok: false, error: "Token invalido." });
+      return res.status(400).json({ ok: false, error: "Invalid token." });
     }
     const validate = await validateRes.json();
     const clientId = ENV_CLIENT_ID || validate.client_id || "kimne78kx3ncx6brgo4mv6wki5h1ko";
@@ -756,7 +756,7 @@ app.post("/api/drops/channels", async (req, res) => {
       (gameName ? gameName.toLowerCase().replace(/\s+/g, "-") : null) ||
       null;
     if (!slug) {
-      return res.status(400).json({ ok: false, error: "No hay slug de juego." });
+      return res.status(400).json({ ok: false, error: "Game slug not available." });
     }
 
     const headers = {
@@ -833,7 +833,7 @@ app.post("/api/drops/channels", async (req, res) => {
       edges = await queryDirectory(false);
     }
     if (!edges.length) {
-      return res.status(404).json({ ok: false, error: "Sin streams en directorio." });
+      return res.status(404).json({ ok: false, error: "No live streams found in the directory." });
     }
     const list = edges.map((e) => ({
       channel: e?.node?.broadcaster?.login,
@@ -855,13 +855,13 @@ async function startFarmStream(channel, profileId = activeProfileId) {
   const state = getFarmState(profileId);
   const context = await ensureContextForFarm(profileId);
   if (!channel) {
-    throw new Error("Falta canal para farmear.");
+    throw new Error("Channel to farm is missing.");
   }
   if (state.page && !state.page.isClosed()) {
     try {
       await state.page.close();
     } catch (e) {
-      console.log("[farm] error cerrando anterior farmPage", e.message);
+      console.log("[farm] error closing previous farmPage", e.message);
     }
   }
 
@@ -869,7 +869,7 @@ async function startFarmStream(channel, profileId = activeProfileId) {
     state.page = await context.newPage();
     await state.page.goto(`https://www.twitch.tv/${channel}`, { waitUntil: "domcontentloaded" });
     await state.page.waitForTimeout(3000);
-    if (state.page.isClosed()) throw new Error("farmPage cerrada tras abrir.");
+    if (state.page.isClosed()) throw new Error("Farm page closed right after opening.");
     try {
       await state.page.evaluate(() => {
         const btn = document.querySelector('[data-a-target="player-play-pause-button"]');
@@ -883,14 +883,14 @@ async function startFarmStream(channel, profileId = activeProfileId) {
         }
       });
     } catch (e) {
-      console.log("[farm] no se pudo forzar play", e.message);
+      console.log("[farm] unable to force play", e.message);
     }
   };
 
   try {
     await openAndPlay();
   } catch (e) {
-    console.log("[farm] reintentando apertura de canal", e.message);
+    console.log("[farm] retrying channel open", e.message);
     await openAndPlay();
   }
 
@@ -907,7 +907,7 @@ async function stopFarmStream(profileId = activeProfileId) {
     try {
       await state.page.close();
     } catch (e) {
-      console.log("[farm] error al cerrar farmPage", e.message);
+      console.log("[farm] error closing farmPage", e.message);
     }
   }
   state.page = null;
@@ -932,7 +932,7 @@ async function getFarmStatus(profileId = activeProfileId) {
         try {
           await startFarmStream(next, profileId);
         } catch (e) {
-          console.log("[farm] error iniciando siguiente de la cola", e.message);
+          console.log("[farm] error starting next in queue", e.message);
           state.inProgress = false;
         }
       }
@@ -948,7 +948,7 @@ async function getFarmStatus(profileId = activeProfileId) {
     if (!playing && state.queue && state.queue.length > 0) {
       const next = state.queue.shift();
       if (next) {
-        console.log("[farm] cambiando a siguiente en cola", next);
+        console.log("[farm] switching to next in queue", next);
         await startFarmStream(next, profileId);
       }
     }
@@ -966,11 +966,11 @@ app.post("/api/drops/farm/start", async (req, res) => {
     const profileId = activeProfileId;
     const state = getFarmState(profileId);
     if (!channel && !Array.isArray(queue)) {
-      return res.status(400).json({ ok: false, error: "Falta canal o cola." });
+      return res.status(400).json({ ok: false, error: "Channel or queue is required." });
     }
     if (Array.isArray(queue)) {
       state.queue = queue.filter(Boolean);
-      console.log("[farm] cola actualizada", state.queue);
+      console.log("[farm] queue updated", state.queue);
     }
     if (channel) {
       const status = await startFarmStream(channel, profileId);
@@ -1018,7 +1018,7 @@ app.post("/api/profiles", async (req, res) => {
     const label =
       typeof name === "string" && name.trim().length
         ? name.trim().slice(0, 60)
-        : `Perfil ${profiles.length + 1}`;
+        : `Profile ${profiles.length + 1}`;
     const id = `profile-${Date.now().toString(36)}-${crypto.randomUUID().split("-")[0]}`;
     profiles.push({
       id,
@@ -1038,7 +1038,7 @@ app.post("/api/profiles/active", async (req, res) => {
   try {
     const { id } = req.body || {};
     if (!id) {
-      return res.status(400).json({ ok: false, error: "Falta id de perfil." });
+      return res.status(400).json({ ok: false, error: "Profile id is missing." });
     }
     await setActiveProfile(id);
     res.json({ ok: true, active: activeProfileId, profiles: listProfilesWithSummary() });
@@ -1050,11 +1050,11 @@ app.post("/api/profiles/active", async (req, res) => {
 app.delete("/api/profiles/:id", async (req, res) => {
   try {
     const { id } = req.params || {};
-    if (!id) return res.status(400).json({ ok: false, error: "Falta id de perfil." });
+    if (!id) return res.status(400).json({ ok: false, error: "Profile id is missing." });
     const idx = profiles.findIndex((p) => p.id === id);
-    if (idx === -1) return res.status(404).json({ ok: false, error: "Perfil no encontrado." });
+    if (idx === -1) return res.status(404).json({ ok: false, error: "Profile not found." });
     if (profiles.length <= 1) {
-      return res.status(400).json({ ok: false, error: "Debe existir al menos un perfil." });
+      return res.status(400).json({ ok: false, error: "At least one profile must remain." });
     }
     const deletingActive = id === activeProfileId;
     const farmState = farmSessions.get(id);
@@ -1063,14 +1063,14 @@ app.delete("/api/profiles/:id", async (req, res) => {
         try {
           await farmState.page.close();
         } catch (e) {
-          console.log("[profiles] error cerrando farm page al borrar perfil", e.message);
+          console.log("[profiles] error closing farm page while deleting profile", e.message);
         }
       }
       if (farmState.context) {
         try {
           await farmState.context.close();
         } catch (e) {
-          console.log("[profiles] error cerrando farm context al borrar perfil", e.message);
+          console.log("[profiles] error closing farm context while deleting profile", e.message);
         }
       }
       farmSessions.delete(id);
@@ -1101,7 +1101,7 @@ app.get("/api/status", (req, res) => {
     farm: { channel: farmState.channel, inProgress: farmState.inProgress },
     profile: {
       id: activeProfileId,
-      name: activeProfile?.name || "Perfil",
+      name: activeProfile?.name || "Profile",
     },
   });
 });
@@ -1112,7 +1112,7 @@ app.post("/api/login/start", async (req, res) => {
     console.log("[api] /login/start ok");
     res.json({
       ok: true,
-      message: "Navegador embebido listo. Usa el visor integrado para iniciar sesion en Twitch.",
+      message: "Embedded browser ready. Use the built-in viewer to sign in to Twitch.",
       viewport: EMBED_VIEWPORT,
     });
   } catch (err) {
@@ -1124,7 +1124,7 @@ app.post("/api/login/start", async (req, res) => {
 app.post("/api/login/stop", async (req, res) => {
   try {
     await stopEmbeddedSession();
-    res.json({ ok: true, message: "Sesion embebida cerrada." });
+    res.json({ ok: true, message: "Embedded session closed." });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -1134,10 +1134,10 @@ app.get("/api/login/frame", async (req, res) => {
   try {
     console.log("[api] /login/frame hit");
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     if (!lastFrame) {
-      console.log("[frame] no hay frame previo, capturando en /frame");
+      console.log("[frame] no previous frame available, capturing in /frame");
       const vp = page.viewportSize() || EMBED_VIEWPORT;
       const buffer = await page.screenshot({
         type: "jpeg",
@@ -1163,10 +1163,10 @@ app.post("/api/login/click", async (req, res) => {
   try {
     const { x, y } = req.body || {};
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     if (typeof x !== "number" || typeof y !== "number") {
-      return res.status(400).json({ ok: false, error: "Coordenadas invalidas." });
+      return res.status(400).json({ ok: false, error: "Invalid coordinates." });
     }
     await page.mouse.click(x, y);
     res.json({ ok: true });
@@ -1179,7 +1179,7 @@ app.post("/api/login/type", async (req, res) => {
   try {
     const { text } = req.body || {};
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     await page.keyboard.type(text || "");
     res.json({ ok: true });
@@ -1192,7 +1192,7 @@ app.post("/api/login/key", async (req, res) => {
   try {
     const { key } = req.body || {};
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     await page.keyboard.press(key || "Enter");
     res.json({ ok: true });
@@ -1205,7 +1205,7 @@ app.post("/api/login/scroll", async (req, res) => {
   try {
     const { deltaY } = req.body || {};
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     await page.mouse.wheel(0, Number(deltaY) || 400);
     res.json({ ok: true });
@@ -1218,7 +1218,7 @@ app.post("/api/login/zoom", async (req, res) => {
   try {
     const { delta } = req.body || {};
     if (!page || page.isClosed()) {
-      return res.status(400).json({ ok: false, error: "No hay sesion embebida activa." });
+      return res.status(400).json({ ok: false, error: "No embedded session is active." });
     }
     const num = Number(delta) || 0;
     currentZoom = Math.min(2, Math.max(0.5, currentZoom + num));
@@ -1233,11 +1233,11 @@ app.post("/api/drops/auto-channel", async (req, res) => {
   try {
     const { gameId, gameName, gameSlug } = req.body || {};
     if (!gameId && !gameName && !gameSlug) {
-      return res.status(400).json({ ok: false, error: "Falta gameId o gameName/slug." });
+      return res.status(400).json({ ok: false, error: "Missing gameId or gameName/slug." });
     }
     const token = getAuthToken();
     if (!token) {
-      return res.status(400).json({ ok: false, error: "No hay auth-token." });
+      return res.status(400).json({ ok: false, error: "auth-token cookie not found." });
     }
     const validateRes = await fetch("https://id.twitch.tv/oauth2/validate", {
       headers: {
@@ -1245,7 +1245,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       },
     });
     if (!validateRes.ok) {
-      return res.status(400).json({ ok: false, error: "Token invalido." });
+      return res.status(400).json({ ok: false, error: "Invalid token." });
     }
     const validate = await validateRes.json();
     const clientId = ENV_CLIENT_ID || validate.client_id || "kimne78kx3ncx6brgo4mv6wki5h1ko";
@@ -1256,7 +1256,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       "User-Agent": "Mozilla/5.0",
     };
 
-    // Intento 1: GQL DirectoryPage_Game (streams con drops)
+    // Attempt 1: GQL DirectoryPage_Game (streams with drops tag)
     try {
       const slug =
         gameSlug ||
@@ -1332,7 +1332,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       console.log("[auto-channel] gql directory error", e.message);
     }
 
-    // Intento 1: search channels por nombre de juego (evita 404 de streams)
+    // Attempt 1b: search channels by game name (avoids stream 404s)
     if (gameName) {
       const searchRes = await fetch(
         `https://api.twitch.tv/helix/search/channels?query=${encodeURIComponent(gameName)}&first=5&live_only=true`,
@@ -1350,7 +1350,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       }
     }
 
-    // Intento 2: GQL DirectoryPage_Game (mas fiable para drops activados)
+    // Attempt 2: GQL DirectoryPage_Game (more reliable for drops-enabled channels)
     try {
       const slug =
         gameSlug ||
@@ -1422,7 +1422,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       console.log("[auto-channel] gql directory error", e.message);
     }
 
-    // Intento 3: streams por game_id
+    // Attempt 3: streams by game_id
     if (gameId) {
       const streamsRes = await fetch(
         `https://api.twitch.tv/helix/streams?game_id=${encodeURIComponent(gameId)}&first=5`,
@@ -1440,7 +1440,7 @@ app.post("/api/drops/auto-channel", async (req, res) => {
       }
     }
 
-    return res.status(404).json({ ok: false, error: "No hay streams en vivo para este juego/drop." });
+    return res.status(404).json({ ok: false, error: "No live streams are currently available for this game/drop." });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -1482,7 +1482,7 @@ app.use((req, res, next) => {
 });
 
 const server = app.listen(PORT, () => {
-  console.log(`Servidor en http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 const wss = new WebSocket.Server({ server, path: "/ws/embedded" });
@@ -1507,14 +1507,14 @@ const cleanUp = async () => {
       try {
         await state.page.close();
       } catch (e) {
-        console.log("[clean] error cerrando page perfil", pid, e.message);
+        console.log("[clean] error closing page for profile", pid, e.message);
       }
     }
     if (state.context) {
       try {
         await state.context.close();
       } catch (e) {
-        console.log("[clean] error cerrando contexto perfil", pid, e.message);
+        console.log("[clean] error closing context for profile", pid, e.message);
       }
     }
   }

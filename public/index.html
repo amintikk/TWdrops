@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TW Drops - Panel</title>
+  <title>TW Drops - Dashboard</title>
   <style>
     :root {
       --bg: #05060b;
@@ -198,24 +198,23 @@
       <div class="profile-switcher">
         <button id="profileToggle" class="profile-btn">
           <div class="profile-label">
-            <span class="tiny muted">Perfil activo</span>
+            <span class="tiny muted">Active profile</span>
             <span id="activeProfileName">-</span>
           </div>
-          <div id="activeProfileStatus" class="profile-status">Sin cookies</div>
+          <div id="activeProfileStatus" class="profile-status">No cookies</div>
         </button>
         <div id="profileMenu" class="profile-menu">
           <div class="profile-menu-head">
             <div>
-              <div class="muted tiny">Perfiles</div>
-              <div class="tiny">Cada uno con su Chrome y cookies propias.</div>
+              <div class="muted tiny">Profiles</div>
             </div>
-            <button id="addProfileBtn" class="add-profile-btn" title="Nuevo perfil">+</button>
+            <button id="addProfileBtn" class="add-profile-btn" title="New profile">+</button>
           </div>
           <div class="new-profile-row">
-            <input id="newProfileName" placeholder="Nombre opcional para el nuevo perfil">
-            <span class="tiny muted">Pulsa + para crear uno nuevo.</span>
+            <input id="newProfileName" placeholder="Optional name for the new profile">
+            <span class="tiny muted">Hit + to create a new one.</span>
           </div>
-          <div id="profilesList" class="profiles-list muted">Cargando perfiles...</div>
+          <div id="profilesList" class="profiles-list muted">Loading profiles...</div>
         </div>
       </div>
     </div>
@@ -224,28 +223,28 @@
   <main>
     <div class="panel">
       <div class="section-header">
-        <h2>Navegador y acciones</h2>
+        <h2>Browser & actions</h2>
         <span class="pill">Login + cookies + stats</span>
       </div>
       <div class="card" style="margin-bottom:12px;">
         <div class="row" style="margin-bottom:8px;">
-          <button id="startLoginBtn">Abrir navegador</button>
-          <button id="captureCookiesBtn" class="secondary">Capturar cookies</button>
+          <button id="startLoginBtn">Open browser</button>
+          <button id="captureCookiesBtn" class="secondary">Capture cookies</button>
         </div>
-        <p id="statusText" class="muted">Estado: esperando...</p>
+        <p id="statusText" class="muted">Status: waiting...</p>
       </div>
       <div class="card" id="embedContainer" style="display:none;">
         <div style="position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#090b14;">
           <img id="embedImage" src="" alt="visor" style="width:100%; display:block; cursor:crosshair; user-select:none;">
         </div>
         <div class="row" style="margin-top:10px; gap:6px;">
-          <input id="typeInput" placeholder="Texto a escribir en el navegador" />
-          <button id="sendTextBtn">Enviar texto</button>
+          <input id="typeInput" placeholder="Text to type in the browser" />
+          <button id="sendTextBtn">Send text</button>
           <button id="enterKeyBtn" class="secondary">Enter</button>
           <button id="tabKeyBtn" class="secondary">Tab</button>
           <button id="backspaceKeyBtn" class="secondary">Backspace</button>
-          <button id="scrollUpBtn" class="secondary">Scroll arriba</button>
-          <button id="scrollDownBtn" class="secondary">Scroll abajo</button>
+          <button id="scrollUpBtn" class="secondary">Scroll up</button>
+          <button id="scrollDownBtn" class="secondary">Scroll down</button>
           <button id="zoomInBtn" class="secondary">+ Zoom</button>
           <button id="zoomOutBtn" class="secondary">- Zoom</button>
         </div>
@@ -254,57 +253,57 @@
 
     <div class="panel">
       <div class="section-header">
-        <h2>Estado, cookies y terminal</h2>
-        <span class="pill">Persistencia</span>
+        <h2>Status, cookies & console</h2>
+        <span class="pill">Persistence</span>
       </div>
       <div class="grid">
         <div class="card">
-          <h3 style="margin:0 0 8px 0;">Estado de sesion</h3>
-          <p><span class="badge">Navegador</span> <span class="value" id="browserState">-</span></p>
-          <p><span class="badge">Cookies</span> <span class="value" id="cookieCount">0</span> en Twitch</p>
+          <h3 style="margin:0 0 8px 0;">Session status</h3>
+          <p><span class="badge">Browser</span> <span class="value" id="browserState">-</span></p>
+          <p><span class="badge">Cookies</span> <span class="value" id="cookieCount">0</span> on Twitch</p>
         </div>
         <div class="card">
-          <h3 style="margin:0 0 8px 0;">Cookies clave</h3>
+          <h3 style="margin:0 0 8px 0;">Key cookies</h3>
           <p>auth-token: <span id="authToken" class="value">-</span></p>
           <p>device_id: <span id="deviceId" class="value">-</span></p>
-          <p>Idioma: <span id="language" class="value">-</span></p>
+          <p>Language: <span id="language" class="value">-</span></p>
         </div>
         <div class="card">
-          <h3 style="margin:0 0 8px 0;">Stats de cuenta</h3>
-          <div id="statsContent" class="muted">Sin datos todavia.</div>
+          <h3 style="margin:0 0 8px 0;">Account stats</h3>
+          <div id="statsContent" class="muted">No data yet.</div>
         </div>
       </div>
       <div class="card" style="margin-top:12px;">
-        <h3 style="margin:0 0 8px 0;">Terminal</h3>
-        <div id="messages">Listo.</div>
+        <h3 style="margin:0 0 8px 0;">Console</h3>
+        <div id="messages">Ready.</div>
       </div>
     </div>
 
     <div class="panel">
       <div class="section-header">
-        <h2>Drops activos</h2>
-        <span class="pill">Campanas en curso</span>
+        <h2>Active drops</h2>
+        <span class="pill">Campaigns in progress</span>
       </div>
       <div class="card">
         <div class="row" style="margin-bottom:10px;">
-          <button id="refreshDropsBtn" class="secondary">Refrescar drops</button>
-          <button id="farmBtn">Farmear drop</button>
+          <button id="refreshDropsBtn" class="secondary">Refresh drops</button>
+          <button id="farmBtn">Farm drop</button>
           <button id="stopFarmBtn" class="secondary">Stop farming</button>
         </div>
-        <div id="queueStatus" class="muted" style="margin-bottom:6px;">Cola: vacia.</div>
+        <div id="queueStatus" class="muted" style="margin-bottom:6px;">Queue: empty.</div>
         <div class="two-col">
           <div class="scroll-pane">
             <h4 style="margin:0 0 6px 0;">Drops</h4>
             <div id="dropsList" class="drop-list">
-              <div class="muted">Sin datos</div>
+              <div class="muted">No data</div>
             </div>
           </div>
           <div class="scroll-pane">
-            <h4 style="margin:0 0 6px 0;">Canales detectados</h4>
-            <div id="channelsList" class="muted">Aun sin canales. Se cargaran al elegir drop.</div>
+            <h4 style="margin:0 0 6px 0;">Detected channels</h4>
+            <div id="channelsList" class="muted">No channels yet. We'll load them when you choose a drop.</div>
           </div>
         </div>
-        <p class="muted" style="margin-top:8px;">Selecciona un drop y luego carga el canal participante para farmear.</p>
+        <p class="muted" style="margin-top:8px;">Pick a drop, then load one of its channels to farm.</p>
       </div>
     </div>
 
@@ -382,9 +381,9 @@
     function updateQueueStatus() {
       if (!queueStatus) return;
       if (!farmQueue.length) {
-        queueStatus.textContent = "Cola: vacia.";
+        queueStatus.textContent = "Queue: empty.";
       } else {
-        queueStatus.textContent = `Cola: ${farmQueue.length} pendiente(s).`;
+        queueStatus.textContent = `Queue: ${farmQueue.length} pending.`;
       }
     }
 
@@ -405,7 +404,7 @@
           localStorage.removeItem(getFarmStorageKey());
           farmQueue = data.queue || [];
           updateQueueStatus();
-          setDropFarmStatus("Sin farmeo activo.");
+          setDropFarmStatus("Nothing farming right now.");
           highlightFarmingCard();
           return;
         }
@@ -416,7 +415,7 @@
           currentFarm.dropName = st.channel || "drop";
         }
         localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
-        const label = `Farmeando ${currentFarm.dropName || "drop"} en ${st.channel || "canal"} (${st.playing ? "reproduciendo" : "pausado"})`;
+        const label = `Farming ${currentFarm.dropName || "drop"} on ${st.channel || "channel"} (${st.playing ? "playing" : "paused"})`;
         setDropFarmStatus(label, st.playing ? "success" : "error");
         highlightFarmingCard();
       } catch (err) {
@@ -437,13 +436,13 @@
 
     function renderActiveProfileBadge(profile) {
       if (activeProfileName) {
-        activeProfileName.textContent = profile?.name || "Perfil";
+        activeProfileName.textContent = profile?.name || "Profile";
       }
       if (activeProfileStatus) {
         const cookies = profile?.cookies || {};
-        let status = "Sin cookies";
+        let status = "No cookies";
         if (cookies.hasSession) {
-          status = "Sesion lista";
+          status = "Signed in";
         } else if (cookies.count) {
           status = `${cookies.count} cookie(s)`;
         }
@@ -454,7 +453,7 @@
     function renderProfilesMenu() {
       if (!profilesList) return;
       if (!profilesData.length) {
-        profilesList.innerHTML = "<div class='muted'>Sin perfiles creados.</div>";
+        profilesList.innerHTML = "<div class='muted'>No profiles created yet.</div>";
         renderActiveProfileBadge(null);
         return;
       }
@@ -464,10 +463,10 @@
         .map((p) => {
           const cookies = p.cookies || {};
           const status = cookies.hasSession
-            ? "Sesion lista"
+            ? "Signed in"
             : cookies.count
             ? `${cookies.count} cookie(s)`
-            : "Sin cookies";
+            : "No cookies";
           const disableDelete = profilesData.length <= 1;
           return `
             <div class="profile-item ${p.id === activeProfileId ? "active" : ""}" data-profile="${p.id}">
@@ -477,8 +476,8 @@
                 <div class="profile-meta">${escapeHtml(status)}</div>
               </div>
               <div class="profile-actions">
-                <span class="pill">${p.id === activeProfileId ? "Usando" : "Cambiar"}</span>
-                <button class="profile-delete" data-delete="${p.id}" ${disableDelete ? "disabled" : ""} title="Borrar perfil">x</button>
+                <span class="pill">${p.id === activeProfileId ? "In use" : "Switch"}</span>
+                <button class="profile-delete" data-delete="${p.id}" ${disableDelete ? "disabled" : ""} title="Delete profile">x</button>
               </div>
             </div>
           `;
@@ -514,9 +513,9 @@
     }
 
     function clearDropsUI() {
-      dropsList.innerHTML = "<div class='muted'>Sin datos para este perfil.</div>";
+      dropsList.innerHTML = "<div class='muted'>No data for this profile.</div>";
       dropsList.dataset.drops = "[]";
-      channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+      channelsList.textContent = "No channels yet. We'll load them when you choose a drop.";
       channelsList.dataset.channels = "[]";
       channelsList.dataset.selectedChannel = "";
       selectedDropIdx = null;
@@ -536,7 +535,7 @@
         profileMenuOpen = false;
         return;
       }
-      setMessage("Cambiando de perfil...");
+      setMessage("Switching profile...");
       try {
         await callAPI("/api/profiles/active", {
           method: "POST",
@@ -547,14 +546,14 @@
         profileMenu.classList.remove("show");
         profileMenuOpen = false;
         statsLoaded = false;
-        statsContent.textContent = "Sin datos todavia.";
+        statsContent.textContent = "No data yet.";
         farmQueue = [];
         dropsLoading = false;
         refreshDropsBtn.disabled = false;
         updateQueueStatus();
         clearDropsUI();
         highlightFarmingCard();
-        stopFramePull("Perfil cambiado. Abre el navegador para este perfil.");
+        stopFramePull("Profile changed. Open the browser for this profile.");
         await refreshStatus();
         await refreshDrops();
         checkFarmStatus();
@@ -569,7 +568,7 @@
       addProfileBtn.disabled = true;
       try {
         const name = (newProfileName?.value || "").trim();
-        setMessage("Creando perfil vacio...");
+        setMessage("Creating empty profile...");
         await callAPI("/api/profiles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -578,14 +577,14 @@
         if (newProfileName) newProfileName.value = "";
         await syncProfilesFromServer();
         statsLoaded = false;
-        statsContent.textContent = "Sin datos todavia.";
+        statsContent.textContent = "No data yet.";
         farmQueue = [];
         dropsLoading = false;
         refreshDropsBtn.disabled = false;
         updateQueueStatus();
         clearDropsUI();
         highlightFarmingCard();
-        stopFramePull("Perfil nuevo listo. Abre el navegador e inicia sesion.");
+        stopFramePull("New profile ready. Open the browser and sign in.");
         await refreshStatus();
       } catch (err) {
         setMessage(err.message, "error");
@@ -596,20 +595,20 @@
 
     async function deleteProfile(id) {
       if (!id) return;
-      if (!confirm("Borrar este perfil? Se eliminaran sus cookies y configuracion.")) return;
-      setMessage("Borrando perfil...");
+      if (!confirm("Delete this profile? Its cookies and settings will be removed.")) return;
+      setMessage("Deleting profile...");
       try {
         await callAPI(`/api/profiles/${id}`, { method: "DELETE" });
         await syncProfilesFromServer();
         statsLoaded = false;
-        statsContent.textContent = "Sin datos todavia.";
+        statsContent.textContent = "No data yet.";
         farmQueue = [];
         dropsLoading = false;
         refreshDropsBtn.disabled = false;
         updateQueueStatus();
         clearDropsUI();
         highlightFarmingCard();
-        stopFramePull("Perfil eliminado. Selecciona otro perfil y abre el navegador.");
+        stopFramePull("Profile removed. Select another profile and open the browser.");
         await refreshStatus();
         await refreshDrops();
       } catch (err) {
@@ -625,12 +624,12 @@
         if (data.profile?.id) {
           activeProfileId = data.profile.id;
         }
-        browserState.textContent = data.browserOpen ? "Abierto" : "Cerrado";
+        browserState.textContent = data.browserOpen ? "Open" : "Closed";
         cookieCount.textContent = data.cookies.count || 0;
         authToken.textContent = data.cookies.authToken ? data.cookies.authToken.slice(0, 10) + "..." : "-";
         deviceId.textContent = data.cookies.deviceId || "-";
         languageEl.textContent = data.cookies.language || "-";
-        statusText.textContent = data.cookies.hasSession ? "Sesion lista: puedes capturar stats." : "Inicia sesion y luego captura las cookies.";
+        statusText.textContent = data.cookies.hasSession ? "Session ready: you can fetch stats." : "Sign in and then capture cookies.";
         if (profilesData.length) {
           const idx = profilesData.findIndex((p) => p.id === activeProfileId);
           if (idx >= 0) {
@@ -681,7 +680,7 @@
     async function updateToggleLabel() {
       try {
         const data = await callAPI("/api/status");
-        startLoginBtn.textContent = data.browserOpen ? "Cerrar navegador" : "Abrir navegador";
+        startLoginBtn.textContent = data.browserOpen ? "Close browser" : "Open browser";
       } catch (_) {}
     }
 
@@ -690,15 +689,15 @@
       try {
         const data = await callAPI("/api/status");
         if (data.browserOpen) {
-          setMessage("Cerrando navegador...");
+          setMessage("Closing browser...");
           await callAPI("/api/login/stop", { method: "POST" });
           stopFramePull();
-          setMessage("Navegador cerrado.", "success");
+          setMessage("Browser closed.", "success");
         } else {
-          setMessage("Abriendo navegador...");
+          setMessage("Opening browser...");
           await callAPI("/api/login/start", { method: "POST" });
           startFramePull();
-          setMessage("Navegador listo.");
+          setMessage("Browser ready.");
         }
       } catch (err) {
         setMessage(err.message, "error");
@@ -711,7 +710,7 @@
 
     captureCookiesBtn.onclick = async () => {
       captureCookiesBtn.disabled = true;
-      setMessage("Capturando cookies...");
+      setMessage("Capturing cookies...");
       try {
         const data = await callAPI("/api/login/cookies", { method: "POST" });
         const c = data.cookies;
@@ -719,8 +718,8 @@
         deviceId.textContent = c.deviceId || "-";
         languageEl.textContent = c.language || "-";
         cookieCount.textContent = c.count || 0;
-        statusText.textContent = c.hasSession ? "Cookies listas. Actualizando stats..." : "No se detecto sesion de Twitch.";
-        setMessage("Cookies capturadas. Actualizando stats...", "success");
+        statusText.textContent = c.hasSession ? "Cookies ready. Updating stats..." : "No Twitch session detected.";
+        setMessage("Cookies captured. Updating stats...", "success");
         await loadStats(true);
         await syncProfilesFromServer();
       } catch (err) {
@@ -743,8 +742,8 @@
     }
 
     async function statsBtnHandler() {
-      statsContent.textContent = "Consultando stats...";
-      setMessage("Consultando stats en Twitch...");
+      statsContent.textContent = "Fetching stats...";
+      setMessage("Requesting stats from Twitch...");
       try {
         const data = await callAPI("/api/account/stats");
         const s = data.stats;
@@ -752,21 +751,21 @@
           <div class="profile">
             <img class="avatar" src="${s.profileImageURL}" alt="avatar"/>
             <div>
-              <div class="badge">Usuario</div>
+              <div class="badge">User</div>
               <div class="value" style="font-size:16px;">${s.displayName || s.login} (${s.login})</div>
               <div class="muted">ID: ${s.id}</div>
             </div>
           </div>
           <div class="stat-grid">
-            <div class="stat"><strong>Creado</strong>${new Date(s.createdAt).toLocaleString()}</div>
-            <div class="stat"><strong>Partner</strong>${s.partner ? "Si" : "No"}</div>
-            <div class="stat"><strong>Afiliado</strong>${s.affiliate ? "Si" : "No"}</div>
-            <div class="stat"><strong>Descripcion</strong>${s.description || "Sin bio"}</div>
+            <div class="stat"><strong>Created</strong>${new Date(s.createdAt).toLocaleString()}</div>
+            <div class="stat"><strong>Partner</strong>${s.partner ? "Yes" : "No"}</div>
+            <div class="stat"><strong>Affiliate</strong>${s.affiliate ? "Yes" : "No"}</div>
+            <div class="stat"><strong>Bio</strong>${s.description || "No bio"}</div>
           </div>
         `;
-        setMessage("Stats recuperadas.", "success");
+        setMessage("Stats fetched.", "success");
       } catch (err) {
-        statsContent.textContent = "No se pudieron cargar los datos.";
+        statsContent.textContent = "Could not load data.";
         setMessage(err.message, "error");
       }
     }
@@ -803,7 +802,7 @@
         }
       });
       if (!currentFarm.dropName) {
-        setDropFarmStatus("Ningun drop en farmeo.");
+        setDropFarmStatus("Not farming any drop.");
       }
     }
 
@@ -811,11 +810,11 @@
       if (dropsLoading) return;
       dropsLoading = true;
       refreshDropsBtn.disabled = true;
-      dropsList.innerHTML = "<div class='muted'>Cargando drops...</div>";
+      dropsList.innerHTML = "<div class='muted'>Loading drops...</div>";
       const activeProfile = profilesData.find((p) => p.id === activeProfileId);
       if (activeProfile && !activeProfile.cookies?.hasSession) {
-        dropsList.innerHTML = "<div class='muted'>Captura cookies para este perfil y vuelve a refrescar.</div>";
-        channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+        dropsList.innerHTML = "<div class='muted'>Capture cookies for this profile, then refresh.</div>";
+        channelsList.textContent = "No channels yet. We'll load them when you choose a drop.";
         channelsList.dataset.channels = "[]";
         channelsList.dataset.selectedChannel = "";
         selectedDropIdx = null;
@@ -829,9 +828,9 @@
         if (profileSnapshot !== activeProfileId) return;
         const drops = data.drops || [];
         if (!drops.length) {
-          dropsList.innerHTML = "<div class='muted'>No hay campanas activas ahora.</div>";
+          dropsList.innerHTML = "<div class='muted'>No active campaigns right now.</div>";
           dropsList.dataset.drops = "[]";
-          channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+          channelsList.textContent = "No channels yet. We'll load them when you choose a drop.";
           channelsList.dataset.channels = "[]";
           channelsList.dataset.selectedChannel = "";
           selectedDropIdx = null;
@@ -851,7 +850,7 @@
                     txt = txt.replace(/\bof\s*$/i, "").trim();
                     return txt;
                   })();
-                  let label = required ? `${current}/${required} min` : "Progreso no disponible";
+                  let label = required ? `${current}/${required} min` : "Progress unavailable";
                   if (cleanedProgress) {
                     label += ` - ${cleanedProgress}`;
                   }
@@ -860,7 +859,7 @@
                       <div class="row">
                         ${b.image ? `<img src="${b.image}" alt="${b.name || 'benefit'}">` : ''}
                         <div style="flex:1;">
-                          <div class="value">${b.name || 'Recompensa'}</div>
+                          <div class="value">${b.name || 'Reward'}</div>
                           <div class="progress-wrap drop-progress">
                             <div class="progress-fill" style="width:${percent.toFixed(1)}%;"></div>
                           </div>
@@ -876,18 +875,18 @@
               return `
                 <div class="drop-card ${isFarming ? "farming" : ""}" data-drop-index="${idx}" data-drop-name="${d.name || ""}" data-drop-channels="${(d.channels || []).join(",")}">
                   <div class="row" style="justify-content: space-between; align-items:center;">
-                    <h4>${d.name || "Campana"}</h4>
+                    <h4>${d.name || "Campaign"}</h4>
                     <span class="pill">${d.status || "-"}</span>
                   </div>
                   <div class="drop-meta">
-                    <span>Juego: ${d.game || "-"}</span>
-                    <span>Estado: ${d.status || "-"}</span>
-                    <span>Inicio: ${start}</span>
-                    <span>Fin: ${end}</span>
+                    <span>Game: ${d.game || "-"}</span>
+                    <span>Status: ${d.status || "-"}</span>
+                    <span>Start: ${start}</span>
+                    <span>End: ${end}</span>
                   </div>
                   ${channels ? `<div class="drop-meta">${channels}</div>` : ""}
-                  ${benefits || "<div class='tiny'>Sin recompensas listadas.</div>"}
-                  ${d.detailsURL ? `<div class="tiny"><a href="${d.detailsURL}" target="_blank" style="color:var(--accent);">Detalles</a></div>` : ""}
+                  ${benefits || "<div class='tiny'>No rewards listed.</div>"}
+                  ${d.detailsURL ? `<div class="tiny"><a href="${d.detailsURL}" target="_blank" style="color:var(--accent);">Details</a></div>` : ""}
                 </div>
               `;
             })
@@ -911,7 +910,7 @@
           }
           dropsList.dataset.drops = JSON.stringify(drops);
         }
-        setMessage("Drops cargados.", "success");
+        setMessage("Drops loaded.", "success");
       } catch (err) {
         dropsList.innerHTML = `<div class='muted'>${err.message}</div>`;
         setMessage(err.message, "error");
@@ -935,7 +934,7 @@
         });
         const channels = res.channels || [];
         if (!channels.length) {
-          channelsList.textContent = "Sin canales encontrados para este drop.";
+          channelsList.textContent = "No channels found for this drop.";
           channelsList.dataset.channels = "[]";
           channelsList.dataset.selectedChannel = "";
           return channels;
@@ -946,8 +945,8 @@
               <div class="channel-card ${i === 0 ? "active" : ""}" data-channel="${c.channel || ""}">
                 <img class="channel-avatar" src="${c.profileImage || ""}" alt="">
                 <div style="flex:1;">
-                  <div class="value">${c.displayName || c.channel || "canal"}</div>
-                  <div class="tiny">${c.title || "Sin titulo"}  ${c.viewers || 0} viewers</div>
+                  <div class="value">${c.displayName || c.channel || "channel"}</div>
+                  <div class="tiny">${c.title || "Untitled"}  ${c.viewers || 0} viewers</div>
                 </div>
               </div>
             `
@@ -979,15 +978,15 @@
         channel = chans[0]?.channel || "";
       }
       if (!channel) {
-        setMessage("No se pudo determinar canal para farmear.", "error");
-        setDropFarmStatus("No hay canal seleccionado para farmear.", "error");
+        setMessage("Could not determine a channel to farm.", "error");
+        setDropFarmStatus("No channel selected to farm.", "error");
         return;
       }
       farmBtn.classList.add("loading");
-      farmBtn.innerHTML = "<span>Farmear drop</span>";
+      farmBtn.innerHTML = "<span>Farm drop</span>";
       try {
         if (currentFarm.channel) {
-          // ya farmeando: agregar a cola
+          // already farming: append to queue
           if (!farmQueue.includes(channel)) {
             farmQueue.push(channel);
           }
@@ -997,7 +996,7 @@
             body: JSON.stringify({ queue: farmQueue }),
           });
           updateQueueStatus();
-          setDropFarmStatus(`Canal ${channel} agregado a la cola.`, "success");
+          setDropFarmStatus(`Channel ${channel} added to the queue.`, "success");
         } else {
           await callAPI("/api/drops/farm/start", {
             method: "POST",
@@ -1006,7 +1005,7 @@
           });
           currentFarm = { dropName: drop.name || "", channel };
           localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
-          setDropFarmStatus(`Farmeando "${drop.name || ""}" en ${channel}. (stream en servidor)`, "success");
+          setDropFarmStatus(`Farming "${drop.name || ""}" on ${channel}. (running on server)`, "success");
           highlightFarmingCard();
           scheduleFarmStatusPoll();
         }
@@ -1014,7 +1013,7 @@
         setDropFarmStatus(err.message, "error");
       } finally {
         farmBtn.classList.remove("loading");
-        farmBtn.textContent = "Farmear drop";
+        farmBtn.textContent = "Farm drop";
       }
     };
 
@@ -1027,7 +1026,7 @@
         localStorage.removeItem(getFarmStorageKey());
         highlightFarmingCard();
         updateQueueStatus();
-        setDropFarmStatus("Farmeo detenido.", "success");
+        setDropFarmStatus("Farming stopped.", "success");
       } catch (err) {
         setDropFarmStatus(err.message, "error");
       } finally {
@@ -1049,7 +1048,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ x, y }),
         });
-        setMessage(`Click enviado (${x.toFixed(0)}, ${y.toFixed(0)}).`);
+        setMessage(`Click sent (${x.toFixed(0)}, ${y.toFixed(0)}).`);
       } catch (err) {
         setMessage(err.message, "error");
       }
@@ -1058,7 +1057,7 @@
     sendTextBtn.onclick = async () => {
       const text = typeInput.value || "";
       if (!text) {
-        setMessage("Escribe texto para enviar.", "error");
+        setMessage("Type something to send.", "error");
         return;
       }
       try {
@@ -1067,7 +1066,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text }),
         });
-        setMessage("Texto enviado.", "success");
+        setMessage("Text sent.", "success");
         typeInput.value = "";
       } catch (err) {
         setMessage(err.message, "error");
@@ -1089,7 +1088,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ key }),
         });
-        setMessage(`Tecla ${key} enviada.`, "success");
+        setMessage(`Key ${key} sent.`, "success");
       } catch (err) {
         setMessage(err.message, "error");
       }
@@ -1102,7 +1101,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deltaY }),
         });
-        setMessage(`Scroll ${deltaY > 0 ? "abajo" : "arriba"} enviado.`, "success");
+        setMessage(`Scroll ${deltaY > 0 ? "down" : "up"} sent.`, "success");
       } catch (err) {
         setMessage(err.message, "error");
       }
