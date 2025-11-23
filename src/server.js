@@ -1,16 +1,20 @@
-const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
 const { chromium } = require("playwright");
 const WebSocket = require("ws");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PROFILE_ROOT = path.join(__dirname, "..", ".twdrops-profile");
 const PROFILES_META_PATH = path.join(PROFILE_ROOT, "profiles.json");
 const DEFAULT_PROFILE_ID = "default";
+const AUTH_PATH = path.join(PROFILE_ROOT, "auth.json");
+const AUTH_COOKIE = "twdrops_token";
+const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12h
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
 
 // Optional: inject these from your own browser if you have them
 const ENV_CLIENT_INTEGRITY = process.env.TW_CLIENT_INTEGRITY || null;
@@ -19,7 +23,93 @@ const ENV_CLIENT_ID = process.env.TW_CLIENT_ID || "kimne78kx3ncx6brgo4mv6wki5h1k
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "..", "public")));
+
+function setAuthCookie(res, username, secret) {
+  const token = signToken(username, secret);
+  res.cookie(AUTH_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: TOKEN_TTL_MS,
+  });
+}
+
+app.get("/auth/register", (req, res) => {
+  const data = loadAuthData();
+  if (data?.user) {
+    return res.redirect("/auth/login");
+  }
+  res.sendFile(path.join(PUBLIC_DIR, "auth", "register.html"));
+});
+
+app.get("/auth/login", (req, res) => {
+  const data = loadAuthData();
+  if (!data?.user) {
+    return res.redirect("/auth/register");
+  }
+  res.sendFile(path.join(PUBLIC_DIR, "auth", "login.html"));
+});
+
+app.post("/auth/register", (req, res) => {
+  const data = loadAuthData();
+  if (data?.user) {
+    return res.status(400).json({ ok: false, error: "Registration already completed. Please log in." });
+  }
+  const { username, password } = req.body || {};
+  if (typeof username !== "string" || username.trim().length < 3) {
+    return res.status(400).json({ ok: false, error: "Username must be at least 3 characters." });
+  }
+  if (typeof password !== "string" || password.length < 6) {
+    return res.status(400).json({ ok: false, error: "Password must be at least 6 characters." });
+  }
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = hashPassword(password, salt);
+  const secret = crypto.randomBytes(32).toString("hex");
+  saveAuthData({ user: { username: username.trim(), salt, hash }, secret });
+  setAuthCookie(res, username.trim(), secret);
+  res.json({ ok: true });
+});
+
+app.post("/auth/login", (req, res) => {
+  const data = loadAuthData();
+  if (!data || !data.user) {
+    return res.status(400).json({ ok: false, error: "No user registered. Please sign up first." });
+  }
+  const { username, password } = req.body || {};
+  if (username !== data.user.username) {
+    return res.status(401).json({ ok: false, error: "Invalid credentials." });
+  }
+  const hash = hashPassword(password || "", data.user.salt);
+  if (hash !== data.user.hash) {
+    return res.status(401).json({ ok: false, error: "Invalid credentials." });
+  }
+  setAuthCookie(res, username, ensureAuthSecret(data).secret);
+  res.json({ ok: true });
+});
+
+app.post("/auth/logout", (req, res) => {
+  res.clearCookie(AUTH_COOKIE, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
+  res.json({ ok: true });
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/auth")) return next();
+  const data = ensureAuthSecret();
+  if (!data.user) {
+    if (req.method === "GET") return res.redirect("/auth/register");
+    return res.status(401).json({ ok: false, error: "Registration required." });
+  }
+  const cookies = parseCookies(req);
+  const verified = verifyToken(cookies[AUTH_COOKIE], data.secret);
+  if (verified) {
+    req.user = verified.username;
+    return next();
+  }
+  if (req.method === "GET") return res.redirect("/auth/login");
+  return res.status(401).json({ ok: false, error: "Unauthorized" });
+});
+
+app.use(express.static(PUBLIC_DIR, { index: false }));
 
 let browserContext = null;
 let browserProfileId = null;
@@ -103,6 +193,76 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+function parseCookies(req) {
+  const header = req.headers.cookie || "";
+  return header.split(";").reduce((acc, part) => {
+    const [k, v] = part.split("=").map((s) => (s || "").trim());
+    if (k && v) acc[k] = decodeURIComponent(v);
+    return acc;
+  }, {});
+}
+
+function loadAuthData() {
+  if (!fs.existsSync(AUTH_PATH)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(AUTH_PATH, "utf8"));
+  } catch (e) {
+    console.log("[auth] error reading auth file", e.message);
+    return null;
+  }
+}
+
+function saveAuthData(data) {
+  try {
+    ensureDir(PROFILE_ROOT);
+    fs.writeFileSync(AUTH_PATH, JSON.stringify(data, null, 2), "utf8");
+  } catch (e) {
+    console.log("[auth] error saving auth file", e.message);
+  }
+}
+
+function hashPassword(password, salt) {
+  const derived = crypto.scryptSync(password, salt, 64);
+  return derived.toString("hex");
+}
+
+function ensureAuthSecret(data = loadAuthData()) {
+  if (data && data.secret) return data;
+  const updated = data || {};
+  updated.secret = crypto.randomBytes(32).toString("hex");
+  saveAuthData(updated);
+  return updated;
+}
+
+function signToken(username, secret) {
+  const ts = Date.now();
+  const payload = `${username}.${ts}`;
+  const hmac = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return `${payload}.${hmac}`;
+}
+
+function verifyToken(token, secret) {
+  if (!token || !secret) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  const [username, tsStr, sig] = parts;
+  const ts = Number(tsStr);
+  if (!username || !Number.isFinite(ts)) return null;
+  if (Date.now() - ts > TOKEN_TTL_MS) return null;
+  const expected = crypto.createHmac("sha256", secret).update(`${username}.${ts}`).digest("hex");
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  return { username };
+}
+
+function authStatus(req) {
+  const data = loadAuthData();
+  if (!data || !data.user || !data.secret) return { registered: false, user: null };
+  const cookies = parseCookies(req);
+  const token = cookies[AUTH_COOKIE];
+  const verified = verifyToken(token, data.secret);
+  return { registered: true, user: verified ? data.user.username : null };
 }
 
 function getProfileDir(profileId = activeProfileId) {
@@ -1512,7 +1672,14 @@ const server = app.listen(PORT, () => {
 
 const wss = new WebSocket.Server({ server, path: "/ws/embedded" });
 
-wss.on("connection", (ws) => {
+wss.on("connection", (ws, req) => {
+  const data = loadAuthData();
+  const cookies = parseCookies({ headers: { cookie: req.headers.cookie || "" } });
+  const verified = data?.secret ? verifyToken(cookies[AUTH_COOKIE], data.secret) : null;
+  if (!verified) {
+    ws.close(1008, "Unauthorized");
+    return;
+  }
   wsClients.add(ws);
   if (lastFrame) {
     ws.send(JSON.stringify({ type: "frame", image: lastFrame, viewport: lastViewport }));

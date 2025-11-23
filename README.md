@@ -42,13 +42,11 @@ Then open the UI in your browser. From there:
 - `TW_DEVICE_ID` – device id override.
 - `TW_CLIENT_ID` – Twitch client id (defaults to `kimne78kx3ncx6brgo4mv6wki5h1ko`).
 
-## Docker (outline)
-If you want a container:
-- Base image: `node:20-slim`.
-- Install Chromium/Playwright deps (`libnss3`, `libatk-bridge2.0-0`, `libxkbcommon0`, `libdrm2`, `libasound2`, `libgbm1`, `libxcomposite1`, `libxdamage1`, `libxrandr2`, `libx11-xcb1`, fonts).
-- Copy `package*.json`, `npm ci`, then copy `src` and `public`.
-- Expose port `3000`.  
-- Mount `.twdrops-profile` to persist profiles/cookies.
+## Docker (in `docker/`)
+Uses the Playwright base image so Chromium dependencies are already present.
+- Build: `docker build -t twdrops -f docker/Dockerfile .`
+- Run: `docker run -p 3000:3000 -v twdrops_profile:/app/.twdrops-profile twdrops`
+- Browse: `http://localhost:3000` (profile data persists in the `twdrops_profile` volume)
 
 ## Useful scripts
 - `npm start` – run server (Express + Playwright + static frontend).

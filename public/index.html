@@ -339,10 +339,14 @@
     const profileToggle = document.getElementById("profileToggle");
     const profileMenu = document.getElementById("profileMenu");
     const profilesList = document.getElementById("profilesList");
-    const addProfileBtn = document.getElementById("addProfileBtn");
-    const newProfileName = document.getElementById("newProfileName");
-    const activeProfileName = document.getElementById("activeProfileName");
-    const activeProfileStatus = document.getElementById("activeProfileStatus");
+  const addProfileBtn = document.getElementById("addProfileBtn");
+  const newProfileName = document.getElementById("newProfileName");
+  const activeProfileName = document.getElementById("activeProfileName");
+  const activeProfileStatus = document.getElementById("activeProfileStatus");
+  const setBrowserButtonLabel = (isOpen) => {
+    if (!startLoginBtn) return;
+    startLoginBtn.textContent = isOpen ? "Close browser" : "Open browser";
+  };
 
     let frameTimer = null;
     let frameInFlight = false;
@@ -555,6 +559,7 @@
         highlightFarmingCard();
         stopFramePull("Profile changed. Open the browser for this profile.");
         await refreshStatus();
+        setBrowserButtonLabel(false);
         await refreshDrops();
         checkFarmStatus();
         scheduleFarmStatusPoll();
@@ -586,6 +591,7 @@
         highlightFarmingCard();
         stopFramePull("New profile ready. Open the browser and sign in.");
         await refreshStatus();
+        setBrowserButtonLabel(false);
       } catch (err) {
         setMessage(err.message, "error");
       } finally {
@@ -610,6 +616,7 @@
         highlightFarmingCard();
         stopFramePull("Profile removed. Select another profile and open the browser.");
         await refreshStatus();
+        setBrowserButtonLabel(false);
         await refreshDrops();
       } catch (err) {
         setMessage(err.message, "error");
@@ -625,6 +632,7 @@
           activeProfileId = data.profile.id;
         }
         browserState.textContent = data.browserOpen ? "Open" : "Closed";
+        setBrowserButtonLabel(data.browserOpen);
         cookieCount.textContent = data.cookies.count || 0;
         authToken.textContent = data.cookies.authToken ? data.cookies.authToken.slice(0, 10) + "..." : "-";
         deviceId.textContent = data.cookies.deviceId || "-";
@@ -680,7 +688,7 @@
     async function updateToggleLabel() {
       try {
         const data = await callAPI("/api/status");
-        startLoginBtn.textContent = data.browserOpen ? "Close browser" : "Open browser";
+        setBrowserButtonLabel(data.browserOpen);
       } catch (_) {}
     }
 
@@ -699,6 +707,7 @@
           startFramePull();
           setMessage("Browser ready.");
         }
+        setBrowserButtonLabel(data.browserOpen ? false : true);
       } catch (err) {
         setMessage(err.message, "error");
       } finally {

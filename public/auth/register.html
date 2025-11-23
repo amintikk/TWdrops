@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TW Drops - Register</title>
+  <style>
+    body { font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; background:#060712; color:#f5f6fb; margin:0; display:grid; place-items:center; min-height:100vh; }
+    .card { background:#0c0f1c; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; width: min(420px, 90vw); box-shadow:0 20px 60px rgba(0,0,0,0.45); }
+    h1 { margin:0 0 4px 0; }
+    p { margin:0 0 16px 0; color:#9aa0b5; }
+    label { display:block; margin:12px 0 6px; font-weight:600; }
+    input { width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:#0a0c18; color:#f5f6fb; }
+    button { width:100%; margin-top:18px; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(135deg, #a970ff, #8b5cf6); color:#0a0a0f; font-weight:800; cursor:pointer; }
+    .muted { color:#9aa0b5; font-size:13px; margin-top:8px; display:block; text-align:center; }
+    #msg { margin-top:10px; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Create admin user</h1>
+    <p>This will protect the TW Drops panel. Only one user is needed.</p>
+    <label for="username">Username</label>
+    <input id="username" autocomplete="username">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="new-password">
+    <button id="registerBtn">Create account</button>
+    <div id="msg"></div>
+    <span class="muted">Already registered? <a href="/auth/login">Go to login</a></span>
+  </div>
+  <script>
+    const btn = document.getElementById("registerBtn");
+    const msg = document.getElementById("msg");
+    const show = (text, ok=false) => { msg.textContent = text; msg.style.color = ok ? "#6ee7b7" : "#f87171"; };
+    btn.onclick = async () => {
+      btn.disabled = true;
+      show("Creating account...");
+      try {
+        const res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || res.statusText);
+        show("Account created. Redirecting...", true);
+        setTimeout(() => (window.location.href = "/"), 500);
+      } catch (e) {
+        show(e.message || "Error creating account");
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
