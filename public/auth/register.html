@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TW Drops - Register</title>
   <style>
-    body { font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; background:#060712; color:#f5f6fb; margin:0; display:grid; place-items:center; min-height:100vh; }
-    .card { background:#0c0f1c; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; width: min(420px, 90vw); box-shadow:0 20px 60px rgba(0,0,0,0.45); }
+    * { box-sizing: border-box; }
+    body { font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; background:#060712; color:#f5f6fb; margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px; overflow-x:hidden; }
+    .card { background:#0c0f1c; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.45); }
     h1 { margin:0 0 4px 0; }
     p { margin:0 0 16px 0; color:#9aa0b5; }
     label { display:block; margin:12px 0 6px; font-weight:600; }
@@ -15,9 +16,12 @@
     .muted { color:#9aa0b5; font-size:13px; margin-top:8px; display:block; text-align:center; }
     #msg { margin-top:10px; font-size:13px; }
     @media (max-width: 520px) {
-      body { padding: 12px; }
-      .card { width: 100%; padding: 18px; }
-      button { margin-top: 14px; }
+      body { padding: 12px; align-items:center; }
+      .card { width: 100%; max-width: 340px; padding: 16px; margin-top: 12px; }
+      h1 { font-size: 22px; }
+      p, label, input, button { font-size: 15px; }
+      button { margin-top: 12px; padding: 11px; }
+      input { padding: 10px; }
     }
   </style>
 </head>
