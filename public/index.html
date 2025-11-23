@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TW Drops - Panel</title>
+  <style>
+    :root {
+      --bg: #05060b;
+      --panel: #0b0d15;
+      --card: #0f1120;
+      --accent: #a970ff;
+      --accent-2: #8b5cf6;
+      --text: #f5f6fb;
+      --muted: #9aa0b5;
+      --line: rgba(255,255,255,0.14);
+      --line-strong: rgba(255,255,255,0.25);
+      --success: #6ee7b7;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 20px 28px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(169,112,255,0.08), rgba(11,13,21,0.9));
+      backdrop-filter: blur(8px);
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: -0.5px; }
+    .subtitle { color: var(--muted); margin: 6px 0 0 0; }
+    .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .profile-switcher { position: relative; min-width: 220px; display: flex; justify-content: flex-end; flex: 0 0 auto; }
+    .profile-btn { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); padding: 8px 12px; border-radius: 12px; color: var(--text); cursor: pointer; min-width: 220px; justify-content: space-between; width: auto; }
+    .profile-btn:hover { border-color: var(--accent); box-shadow: 0 10px 30px rgba(169,112,255,0.18); }
+    .profile-label { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+    .profile-label #activeProfileName { font-weight: 800; }
+    .profile-status { font-size: 12px; color: var(--muted); padding: 4px 8px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.04); }
+    .profile-menu { position: absolute; right: 0; top: calc(100% + 10px); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px; width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.45); display: none; z-index: 5; }
+    .profile-menu.show { display: block; }
+    .profile-menu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .add-profile-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0a0a0f; font-weight: 700; cursor: pointer; }
+    .add-profile-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .new-profile-row { display: flex; flex-direction: column; gap: 6px; padding: 8px 0 10px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+    .profiles-list { display: grid; gap: 8px; margin-top: 10px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+    .profile-item { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; background: #0c0f1a; transition: border 0.15s ease, transform 0.1s ease; cursor: pointer; }
+    .profile-item:hover { border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,0.3); transform: none; }
+    .profile-item.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-2); }
+    .profile-dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 0 3px rgba(169,112,255,0.12); }
+    .profile-meta { font-size: 12px; color: var(--muted); }
+    .profile-actions { display: flex; align-items: center; gap: 8px; }
+    .profile-actions .pill { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 10px; line-height: 1; }
+    .profile-delete { border: 1px solid var(--line); background: rgba(255,255,255,0.06); color: var(--danger); width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; padding: 0; }
+    .profile-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+    main {
+      padding: 20px 28px 40px;
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    h2 { margin: 0; font-size: 18px; }
+    .pill { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0a0a0f;
+      border: 1px solid var(--line-strong);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    button.secondary {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(169,112,255,0.25); }
+    .loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05), rgba(255,255,255,0.15));
+      background-size: 200% 100%;
+      animation: shimmer 1s ease-in-out infinite;
+    }
+    .loading span { visibility: hidden; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .muted { color: var(--muted); font-size: 13px; margin: 4px 0; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .value { color: var(--text); font-weight: 700; }
+    #messages {
+      background: #05050d;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 32px;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      color: var(--text);
+      box-shadow: inset 0 0 12px rgba(169,112,255,0.12);
+    }
+    input {
+      background: #0b0d15;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      width: 100%;
+    }
+    #player {
+      width: 100%;
+      height: 320px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #090b14;
+    }
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .profile { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: center; }
+    .avatar { width: 80px; height: 80px; border-radius: 12px; border: 1px solid var(--line); object-fit: cover; background: #0b0d15; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-top: 10px; }
+    .stat { padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #0b0d15; font-size: 13px; color: var(--muted); }
+    .stat strong { color: var(--text); display: block; }
+    .drop-list { display: grid; gap: 12px; }
+    .drop-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #0c0f1a; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); cursor:pointer; transition: border 0.15s ease, transform 0.1s ease; }
+    .drop-card h4 { margin: 0 0 6px 0; font-size: 15px; }
+    .drop-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .drop-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-2); }
+    .drop-meta { font-size: 12px; color: var(--muted); margin: 4px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+    .benefit { border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-top: 6px; background: rgba(255,255,255,0.02); }
+    .benefit img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; margin-right: 8px; }
+    .benefit .row { align-items: flex-start; }
+    .tiny { font-size: 12px; color: var(--muted); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .scroll-pane { max-height: 420px; overflow-y: auto; padding-right: 4px; }
+    /* Scrollbar custom */
+    .scroll-pane::-webkit-scrollbar { width: 10px; }
+    .scroll-pane::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 8px; }
+    .scroll-pane::-webkit-scrollbar-thumb { background: #23283a; border-radius: 8px; border: 2px solid #0b0d15; }
+    .scroll-pane::-webkit-scrollbar-thumb:hover { background: #2f344a; }
+    .channel-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; background:#0b0d15; cursor:pointer; transition:border 0.15s ease, transform 0.1s ease; margin-bottom: 10px; }
+    .channel-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .channel-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-2); }
+    .channel-avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; border:1px solid var(--line); background:#0c0f1a; }
+    .progress-wrap { position: relative; background: #0f1322; border: 1px solid var(--line); border-radius: 10px; height: 10px; margin-top: 6px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); height: 100%; width: 0%; transition: width 0.15s ease; }
+    .progress-text { font-size: 12px; color: var(--muted); display: block; margin-top: 4px; }
+    .farming { border-color: var(--success); box-shadow: 0 0 0 1px var(--success); }
+    .farming .farm-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background: rgba(110,231,183,0.12); color: var(--success); border:1px solid rgba(110,231,183,0.4); font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <div>
+        <h1>TW Drops</h1>
+      </div>
+      <div class="profile-switcher">
+        <button id="profileToggle" class="profile-btn">
+          <div class="profile-label">
+            <span class="tiny muted">Perfil activo</span>
+            <span id="activeProfileName">-</span>
+          </div>
+          <div id="activeProfileStatus" class="profile-status">Sin cookies</div>
+        </button>
+        <div id="profileMenu" class="profile-menu">
+          <div class="profile-menu-head">
+            <div>
+              <div class="muted tiny">Perfiles</div>
+              <div class="tiny">Cada uno con su Chrome y cookies propias.</div>
+            </div>
+            <button id="addProfileBtn" class="add-profile-btn" title="Nuevo perfil">+</button>
+          </div>
+          <div class="new-profile-row">
+            <input id="newProfileName" placeholder="Nombre opcional para el nuevo perfil">
+            <span class="tiny muted">Pulsa + para crear uno nuevo.</span>
+          </div>
+          <div id="profilesList" class="profiles-list muted">Cargando perfiles...</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div class="section-header">
+        <h2>Navegador y acciones</h2>
+        <span class="pill">Login + cookies + stats</span>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="row" style="margin-bottom:8px;">
+          <button id="startLoginBtn">Abrir navegador</button>
+          <button id="captureCookiesBtn" class="secondary">Capturar cookies</button>
+        </div>
+        <p id="statusText" class="muted">Estado: esperando...</p>
+      </div>
+      <div class="card" id="embedContainer" style="display:none;">
+        <div style="position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#090b14;">
+          <img id="embedImage" src="" alt="visor" style="width:100%; display:block; cursor:crosshair; user-select:none;">
+        </div>
+        <div class="row" style="margin-top:10px; gap:6px;">
+          <input id="typeInput" placeholder="Texto a escribir en el navegador" />
+          <button id="sendTextBtn">Enviar texto</button>
+          <button id="enterKeyBtn" class="secondary">Enter</button>
+          <button id="tabKeyBtn" class="secondary">Tab</button>
+          <button id="backspaceKeyBtn" class="secondary">Backspace</button>
+          <button id="scrollUpBtn" class="secondary">Scroll arriba</button>
+          <button id="scrollDownBtn" class="secondary">Scroll abajo</button>
+          <button id="zoomInBtn" class="secondary">+ Zoom</button>
+          <button id="zoomOutBtn" class="secondary">- Zoom</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-header">
+        <h2>Estado, cookies y terminal</h2>
+        <span class="pill">Persistencia</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin:0 0 8px 0;">Estado de sesion</h3>
+          <p><span class="badge">Navegador</span> <span class="value" id="browserState">-</span></p>
+          <p><span class="badge">Cookies</span> <span class="value" id="cookieCount">0</span> en Twitch</p>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0;">Cookies clave</h3>
+          <p>auth-token: <span id="authToken" class="value">-</span></p>
+          <p>device_id: <span id="deviceId" class="value">-</span></p>
+          <p>Idioma: <span id="language" class="value">-</span></p>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0;">Stats de cuenta</h3>
+          <div id="statsContent" class="muted">Sin datos todavia.</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <h3 style="margin:0 0 8px 0;">Terminal</h3>
+        <div id="messages">Listo.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-header">
+        <h2>Drops activos</h2>
+        <span class="pill">Campanas en curso</span>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <button id="refreshDropsBtn" class="secondary">Refrescar drops</button>
+          <button id="farmBtn">Farmear drop</button>
+          <button id="stopFarmBtn" class="secondary">Stop farming</button>
+        </div>
+        <div id="queueStatus" class="muted" style="margin-bottom:6px;">Cola: vacia.</div>
+        <div class="two-col">
+          <div class="scroll-pane">
+            <h4 style="margin:0 0 6px 0;">Drops</h4>
+            <div id="dropsList" class="drop-list">
+              <div class="muted">Sin datos</div>
+            </div>
+          </div>
+          <div class="scroll-pane">
+            <h4 style="margin:0 0 6px 0;">Canales detectados</h4>
+            <div id="channelsList" class="muted">Aun sin canales. Se cargaran al elegir drop.</div>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:8px;">Selecciona un drop y luego carga el canal participante para farmear.</p>
+      </div>
+    </div>
+
+  </main>
+  <script>
+    const messageBox = document.getElementById("messages");
+    const statusText = document.getElementById("statusText");
+    const browserState = document.getElementById("browserState");
+    const cookieCount = document.getElementById("cookieCount");
+    const authToken = document.getElementById("authToken");
+    const deviceId = document.getElementById("deviceId");
+    const languageEl = document.getElementById("language");
+    const statsContent = document.getElementById("statsContent");
+    const startLoginBtn = document.getElementById("startLoginBtn");
+    const captureCookiesBtn = document.getElementById("captureCookiesBtn");
+    const dropsList = document.getElementById("dropsList");
+    const refreshDropsBtn = document.getElementById("refreshDropsBtn");
+    const farmBtn = document.getElementById("farmBtn");
+    const stopFarmBtn = document.getElementById("stopFarmBtn");
+    const queueStatus = document.getElementById("queueStatus");
+    const channelsList = document.getElementById("channelsList");
+    const embedImage = document.getElementById("embedImage");
+    const typeInput = document.getElementById("typeInput");
+    const sendTextBtn = document.getElementById("sendTextBtn");
+    const enterKeyBtn = document.getElementById("enterKeyBtn");
+    const tabKeyBtn = document.getElementById("tabKeyBtn");
+    const backspaceKeyBtn = document.getElementById("backspaceKeyBtn");
+    const scrollUpBtn = document.getElementById("scrollUpBtn");
+    const scrollDownBtn = document.getElementById("scrollDownBtn");
+    const embedContainer = document.getElementById("embedContainer");
+    const zoomInBtn = document.getElementById("zoomInBtn");
+    const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const profileToggle = document.getElementById("profileToggle");
+    const profileMenu = document.getElementById("profileMenu");
+    const profilesList = document.getElementById("profilesList");
+    const addProfileBtn = document.getElementById("addProfileBtn");
+    const newProfileName = document.getElementById("newProfileName");
+    const activeProfileName = document.getElementById("activeProfileName");
+    const activeProfileStatus = document.getElementById("activeProfileStatus");
+
+    let frameTimer = null;
+    let frameInFlight = false;
+    const FRAME_MS = 80; // ~12 fps
+    let currentZoom = 1;
+    let selectedDropIdx = null;
+    let statsLoading = false;
+    let statsLoaded = false;
+    let dropsLoading = false;
+    let dropsAutoTimer = null;
+    let farmStatusTimer = null;
+    let currentFarm = { dropName: "", channel: "" };
+    const FARM_STORAGE_BASE = "farmState";
+    let profilesData = [];
+    let activeProfileId = null;
+    let profileMenuOpen = false;
+    const getFarmStorageKey = () => `${FARM_STORAGE_BASE}:${activeProfileId || "default"}`;
+    let farmQueue = [];
+
+    const setMessage = (msg, tone = "info") => {
+      const color = tone === "error" ? "var(--danger)" : tone === "success" ? "var(--success)" : "var(--text)";
+      messageBox.style.color = color;
+      messageBox.textContent = msg;
+    };
+
+    const escapeHtml = (value = "") =>
+      String(value).replace(/[&<>"']/g, (char) => {
+        const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+        return map[char] || char;
+      });
+
+    function setDropFarmStatus(text, tone = "info") {
+      setMessage(text, tone);
+    }
+
+    function updateQueueStatus() {
+      if (!queueStatus) return;
+      if (!farmQueue.length) {
+        queueStatus.textContent = "Cola: vacia.";
+      } else {
+        queueStatus.textContent = `Cola: ${farmQueue.length} pendiente(s).`;
+      }
+    }
+
+    function scheduleFarmStatusPoll() {
+      if (farmStatusTimer) clearInterval(farmStatusTimer);
+      checkFarmStatus();
+      farmStatusTimer = setInterval(checkFarmStatus, 15000);
+    }
+
+    async function checkFarmStatus() {
+      const profileSnapshot = activeProfileId;
+      try {
+        const data = await callAPI("/api/drops/farm/status");
+        if (profileSnapshot !== activeProfileId) return;
+        const st = data.status || {};
+        if (!st.active) {
+          currentFarm = { dropName: "", channel: "" };
+          localStorage.removeItem(getFarmStorageKey());
+          farmQueue = data.queue || [];
+          updateQueueStatus();
+          setDropFarmStatus("Sin farmeo activo.");
+          highlightFarmingCard();
+          return;
+        }
+        farmQueue = data.queue || farmQueue;
+        updateQueueStatus();
+        currentFarm.channel = st.channel || currentFarm.channel;
+        if (!currentFarm.dropName) {
+          currentFarm.dropName = st.channel || "drop";
+        }
+        localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
+        const label = `Farmeando ${currentFarm.dropName || "drop"} en ${st.channel || "canal"} (${st.playing ? "reproduciendo" : "pausado"})`;
+        setDropFarmStatus(label, st.playing ? "success" : "error");
+        highlightFarmingCard();
+      } catch (err) {
+        if (profileSnapshot !== activeProfileId) return;
+        setDropFarmStatus(err.message, "error");
+      }
+    }
+
+    async function callAPI(path, options = {}) {
+      const res = await fetch(path, options);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const message = data.error || data.message || res.statusText;
+        throw new Error(message);
+      }
+      return res.json();
+    }
+
+    function renderActiveProfileBadge(profile) {
+      if (activeProfileName) {
+        activeProfileName.textContent = profile?.name || "Perfil";
+      }
+      if (activeProfileStatus) {
+        const cookies = profile?.cookies || {};
+        let status = "Sin cookies";
+        if (cookies.hasSession) {
+          status = "Sesion lista";
+        } else if (cookies.count) {
+          status = `${cookies.count} cookie(s)`;
+        }
+        activeProfileStatus.textContent = status;
+      }
+    }
+
+    function renderProfilesMenu() {
+      if (!profilesList) return;
+      if (!profilesData.length) {
+        profilesList.innerHTML = "<div class='muted'>Sin perfiles creados.</div>";
+        renderActiveProfileBadge(null);
+        return;
+      }
+      const active = profilesData.find((p) => p.id === activeProfileId) || profilesData[0];
+      renderActiveProfileBadge(active);
+      profilesList.innerHTML = profilesData
+        .map((p) => {
+          const cookies = p.cookies || {};
+          const status = cookies.hasSession
+            ? "Sesion lista"
+            : cookies.count
+            ? `${cookies.count} cookie(s)`
+            : "Sin cookies";
+          const disableDelete = profilesData.length <= 1;
+          return `
+            <div class="profile-item ${p.id === activeProfileId ? "active" : ""}" data-profile="${p.id}">
+              <div class="profile-dot"></div>
+              <div style="flex:1;">
+                <div class="value">${escapeHtml(p.name)}</div>
+                <div class="profile-meta">${escapeHtml(status)}</div>
+              </div>
+              <div class="profile-actions">
+                <span class="pill">${p.id === activeProfileId ? "Usando" : "Cambiar"}</span>
+                <button class="profile-delete" data-delete="${p.id}" ${disableDelete ? "disabled" : ""} title="Borrar perfil">x</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+      profilesList.querySelectorAll(".profile-item").forEach((item) => {
+        item.onclick = () => {
+          const id = item.dataset.profile;
+          handleProfileChange(id);
+        };
+      });
+      profilesList.querySelectorAll(".profile-delete").forEach((btn) => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.delete;
+          if (btn.disabled) return;
+          deleteProfile(id);
+        };
+      });
+    }
+
+    function hydrateFarmFromStorage() {
+      currentFarm = { dropName: "", channel: "" };
+      const saved = localStorage.getItem(getFarmStorageKey());
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.channel) {
+            currentFarm = { dropName: parsed.dropName || "", channel: parsed.channel };
+          }
+        } catch (_) {}
+      }
+    }
+
+    function clearDropsUI() {
+      dropsList.innerHTML = "<div class='muted'>Sin datos para este perfil.</div>";
+      dropsList.dataset.drops = "[]";
+      channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+      channelsList.dataset.channels = "[]";
+      channelsList.dataset.selectedChannel = "";
+      selectedDropIdx = null;
+    }
+
+    async function syncProfilesFromServer() {
+      const data = await callAPI("/api/profiles");
+      profilesData = data.profiles || [];
+      activeProfileId = data.active || profilesData[0]?.id || null;
+      renderProfilesMenu();
+      hydrateFarmFromStorage();
+    }
+
+    async function handleProfileChange(id) {
+      if (!id || id === activeProfileId) {
+        profileMenu.classList.remove("show");
+        profileMenuOpen = false;
+        return;
+      }
+      setMessage("Cambiando de perfil...");
+      try {
+        await callAPI("/api/profiles/active", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        await syncProfilesFromServer();
+        profileMenu.classList.remove("show");
+        profileMenuOpen = false;
+        statsLoaded = false;
+        statsContent.textContent = "Sin datos todavia.";
+        farmQueue = [];
+        dropsLoading = false;
+        refreshDropsBtn.disabled = false;
+        updateQueueStatus();
+        clearDropsUI();
+        highlightFarmingCard();
+        stopFramePull("Perfil cambiado. Abre el navegador para este perfil.");
+        await refreshStatus();
+        await refreshDrops();
+        checkFarmStatus();
+        scheduleFarmStatusPoll();
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    async function createProfile() {
+      if (!addProfileBtn) return;
+      addProfileBtn.disabled = true;
+      try {
+        const name = (newProfileName?.value || "").trim();
+        setMessage("Creando perfil vacio...");
+        await callAPI("/api/profiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        });
+        if (newProfileName) newProfileName.value = "";
+        await syncProfilesFromServer();
+        statsLoaded = false;
+        statsContent.textContent = "Sin datos todavia.";
+        farmQueue = [];
+        dropsLoading = false;
+        refreshDropsBtn.disabled = false;
+        updateQueueStatus();
+        clearDropsUI();
+        highlightFarmingCard();
+        stopFramePull("Perfil nuevo listo. Abre el navegador e inicia sesion.");
+        await refreshStatus();
+      } catch (err) {
+        setMessage(err.message, "error");
+      } finally {
+        addProfileBtn.disabled = false;
+      }
+    }
+
+    async function deleteProfile(id) {
+      if (!id) return;
+      if (!confirm("Borrar este perfil? Se eliminaran sus cookies y configuracion.")) return;
+      setMessage("Borrando perfil...");
+      try {
+        await callAPI(`/api/profiles/${id}`, { method: "DELETE" });
+        await syncProfilesFromServer();
+        statsLoaded = false;
+        statsContent.textContent = "Sin datos todavia.";
+        farmQueue = [];
+        dropsLoading = false;
+        refreshDropsBtn.disabled = false;
+        updateQueueStatus();
+        clearDropsUI();
+        highlightFarmingCard();
+        stopFramePull("Perfil eliminado. Selecciona otro perfil y abre el navegador.");
+        await refreshStatus();
+        await refreshDrops();
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    async function refreshStatus() {
+      const profileSnapshot = activeProfileId;
+      try {
+        const data = await callAPI("/api/status");
+        if (profileSnapshot && profileSnapshot !== activeProfileId) return;
+        if (data.profile?.id) {
+          activeProfileId = data.profile.id;
+        }
+        browserState.textContent = data.browserOpen ? "Abierto" : "Cerrado";
+        cookieCount.textContent = data.cookies.count || 0;
+        authToken.textContent = data.cookies.authToken ? data.cookies.authToken.slice(0, 10) + "..." : "-";
+        deviceId.textContent = data.cookies.deviceId || "-";
+        languageEl.textContent = data.cookies.language || "-";
+        statusText.textContent = data.cookies.hasSession ? "Sesion lista: puedes capturar stats." : "Inicia sesion y luego captura las cookies.";
+        if (profilesData.length) {
+          const idx = profilesData.findIndex((p) => p.id === activeProfileId);
+          if (idx >= 0) {
+            profilesData[idx] = { ...profilesData[idx], cookies: data.cookies };
+          }
+          renderProfilesMenu();
+        } else if (data.profile) {
+          renderActiveProfileBadge({ name: data.profile.name || data.profile.id, cookies: data.cookies });
+        }
+        if (data.cookies.hasSession) {
+          await loadStats();
+        }
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    function startFramePull() {
+      stopFramePull();
+      embedContainer.style.display = "block";
+      frameTimer = setInterval(fetchFrame, FRAME_MS);
+    }
+
+    function stopFramePull(msg) {
+      if (frameTimer) clearInterval(frameTimer);
+      frameTimer = null;
+      embedContainer.style.display = "none";
+      embedImage.src = "";
+      if (msg) setMessage(msg);
+    }
+
+    async function fetchFrame() {
+      if (frameInFlight) return;
+      frameInFlight = true;
+      try {
+        const data = await callAPI("/api/login/frame");
+        const { image, viewport } = data;
+        embedImage.dataset.vw = viewport.width;
+        embedImage.dataset.vh = viewport.height;
+        embedImage.src = `data:image/jpeg;base64,${image}`;
+      } catch (err) {
+        setMessage(err.message, "error");
+      } finally {
+        frameInFlight = false;
+      }
+    }
+
+    async function updateToggleLabel() {
+      try {
+        const data = await callAPI("/api/status");
+        startLoginBtn.textContent = data.browserOpen ? "Cerrar navegador" : "Abrir navegador";
+      } catch (_) {}
+    }
+
+    startLoginBtn.onclick = async () => {
+      startLoginBtn.disabled = true;
+      try {
+        const data = await callAPI("/api/status");
+        if (data.browserOpen) {
+          setMessage("Cerrando navegador...");
+          await callAPI("/api/login/stop", { method: "POST" });
+          stopFramePull();
+          setMessage("Navegador cerrado.", "success");
+        } else {
+          setMessage("Abriendo navegador...");
+          await callAPI("/api/login/start", { method: "POST" });
+          startFramePull();
+          setMessage("Navegador listo.");
+        }
+      } catch (err) {
+        setMessage(err.message, "error");
+      } finally {
+        startLoginBtn.disabled = false;
+        refreshStatus();
+        updateToggleLabel();
+      }
+    };
+
+    captureCookiesBtn.onclick = async () => {
+      captureCookiesBtn.disabled = true;
+      setMessage("Capturando cookies...");
+      try {
+        const data = await callAPI("/api/login/cookies", { method: "POST" });
+        const c = data.cookies;
+        authToken.textContent = c.authToken ? c.authToken.slice(0, 10) + "..." : "-";
+        deviceId.textContent = c.deviceId || "-";
+        languageEl.textContent = c.language || "-";
+        cookieCount.textContent = c.count || 0;
+        statusText.textContent = c.hasSession ? "Cookies listas. Actualizando stats..." : "No se detecto sesion de Twitch.";
+        setMessage("Cookies capturadas. Actualizando stats...", "success");
+        await loadStats(true);
+        await syncProfilesFromServer();
+      } catch (err) {
+        setMessage(err.message, "error");
+      } finally {
+        captureCookiesBtn.disabled = false;
+      }
+    };
+
+    async function loadStats(force = false) {
+      if (statsLoading) return;
+      if (statsLoaded && !force) return;
+      statsLoading = true;
+      try {
+        await statsBtnHandler();
+        statsLoaded = true;
+      } finally {
+        statsLoading = false;
+      }
+    }
+
+    async function statsBtnHandler() {
+      statsContent.textContent = "Consultando stats...";
+      setMessage("Consultando stats en Twitch...");
+      try {
+        const data = await callAPI("/api/account/stats");
+        const s = data.stats;
+        statsContent.innerHTML = `
+          <div class="profile">
+            <img class="avatar" src="${s.profileImageURL}" alt="avatar"/>
+            <div>
+              <div class="badge">Usuario</div>
+              <div class="value" style="font-size:16px;">${s.displayName || s.login} (${s.login})</div>
+              <div class="muted">ID: ${s.id}</div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat"><strong>Creado</strong>${new Date(s.createdAt).toLocaleString()}</div>
+            <div class="stat"><strong>Partner</strong>${s.partner ? "Si" : "No"}</div>
+            <div class="stat"><strong>Afiliado</strong>${s.affiliate ? "Si" : "No"}</div>
+            <div class="stat"><strong>Descripcion</strong>${s.description || "Sin bio"}</div>
+          </div>
+        `;
+        setMessage("Stats recuperadas.", "success");
+      } catch (err) {
+        statsContent.textContent = "No se pudieron cargar los datos.";
+        setMessage(err.message, "error");
+      }
+    }
+
+    function highlightFarmingCard() {
+      const cards = dropsList.querySelectorAll(".drop-card");
+      cards.forEach((card) => {
+        const name = card.dataset.dropName || "";
+        const dropChannels = (card.dataset.dropChannels || "").split(",").filter(Boolean);
+        if (currentFarm.dropName && name === currentFarm.dropName) {
+          card.classList.add("farming");
+          card.querySelectorAll(".farm-pill").forEach((b) => b.remove());
+          const badge = document.createElement("div");
+          badge.className = "farm-pill";
+          badge.textContent = `Farmeando en ${currentFarm.channel}`;
+          const meta = card.querySelector(".drop-meta");
+          if (meta) {
+            meta.appendChild(badge);
+          } else {
+            card.appendChild(badge);
+          }
+        } else if (currentFarm.channel && dropChannels.includes(currentFarm.channel)) {
+          card.classList.add("farming");
+          card.querySelectorAll(".farm-pill").forEach((b) => b.remove());
+          const badge = document.createElement("div");
+          badge.className = "farm-pill";
+          badge.textContent = `Farmeando en ${currentFarm.channel}`;
+          const meta = card.querySelector(".drop-meta");
+          if (meta) meta.appendChild(badge);
+          else card.appendChild(badge);
+        } else {
+          card.classList.remove("farming");
+          card.querySelectorAll(".farm-pill").forEach((b) => b.remove());
+        }
+      });
+      if (!currentFarm.dropName) {
+        setDropFarmStatus("Ningun drop en farmeo.");
+      }
+    }
+
+    async function refreshDrops() {
+      if (dropsLoading) return;
+      dropsLoading = true;
+      refreshDropsBtn.disabled = true;
+      dropsList.innerHTML = "<div class='muted'>Cargando drops...</div>";
+      const activeProfile = profilesData.find((p) => p.id === activeProfileId);
+      if (activeProfile && !activeProfile.cookies?.hasSession) {
+        dropsList.innerHTML = "<div class='muted'>Captura cookies para este perfil y vuelve a refrescar.</div>";
+        channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+        channelsList.dataset.channels = "[]";
+        channelsList.dataset.selectedChannel = "";
+        selectedDropIdx = null;
+        refreshDropsBtn.disabled = false;
+        dropsLoading = false;
+        return;
+      }
+      try {
+        const profileSnapshot = activeProfileId;
+        const data = await callAPI("/api/drops/active");
+        if (profileSnapshot !== activeProfileId) return;
+        const drops = data.drops || [];
+        if (!drops.length) {
+          dropsList.innerHTML = "<div class='muted'>No hay campanas activas ahora.</div>";
+          dropsList.dataset.drops = "[]";
+          channelsList.textContent = "Aun sin canales. Se cargaran al elegir drop.";
+          channelsList.dataset.channels = "[]";
+          channelsList.dataset.selectedChannel = "";
+          selectedDropIdx = null;
+        } else {
+          dropsList.innerHTML = drops
+            .map((d, idx) => {
+              const start = d.startAt ? new Date(d.startAt).toLocaleString() : "-";
+              const end = d.endAt ? new Date(d.endAt).toLocaleString() : "-";
+              const benefits = (d.benefits || [])
+                .map((b) => {
+                  const current = Number(b.currentMinutes) || 0;
+                  const required = Number(b.requiredMinutes) || 0;
+                  const percent = required ? Math.min(100, Math.max(0, (current / required) * 100)) : 0;
+                  const cleanedProgress = (() => {
+                    if (!b.progressText) return "";
+                    let txt = b.progressText.replace(/\{[^}]+\}/g, "").replace(/\s+/g, " ").trim();
+                    txt = txt.replace(/\bof\s*$/i, "").trim();
+                    return txt;
+                  })();
+                  let label = required ? `${current}/${required} min` : "Progreso no disponible";
+                  if (cleanedProgress) {
+                    label += ` - ${cleanedProgress}`;
+                  }
+                  return `
+                    <div class="benefit">
+                      <div class="row">
+                        ${b.image ? `<img src="${b.image}" alt="${b.name || 'benefit'}">` : ''}
+                        <div style="flex:1;">
+                          <div class="value">${b.name || 'Recompensa'}</div>
+                          <div class="progress-wrap drop-progress">
+                            <div class="progress-fill" style="width:${percent.toFixed(1)}%;"></div>
+                          </div>
+                          <span class="progress-text">${label}</span>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join('');
+              const channels = (d.channels || []).slice(0, 3).map((ch) => `<span class="pill">${ch}</span>`).join('');
+              const isFarming = currentFarm.dropName && currentFarm.dropName === (d.name || "");
+              return `
+                <div class="drop-card ${isFarming ? "farming" : ""}" data-drop-index="${idx}" data-drop-name="${d.name || ""}" data-drop-channels="${(d.channels || []).join(",")}">
+                  <div class="row" style="justify-content: space-between; align-items:center;">
+                    <h4>${d.name || "Campana"}</h4>
+                    <span class="pill">${d.status || "-"}</span>
+                  </div>
+                  <div class="drop-meta">
+                    <span>Juego: ${d.game || "-"}</span>
+                    <span>Estado: ${d.status || "-"}</span>
+                    <span>Inicio: ${start}</span>
+                    <span>Fin: ${end}</span>
+                  </div>
+                  ${channels ? `<div class="drop-meta">${channels}</div>` : ""}
+                  ${benefits || "<div class='tiny'>Sin recompensas listadas.</div>"}
+                  ${d.detailsURL ? `<div class="tiny"><a href="${d.detailsURL}" target="_blank" style="color:var(--accent);">Detalles</a></div>` : ""}
+                </div>
+              `;
+            })
+            .join("");
+          const cards = dropsList.querySelectorAll(".drop-card");
+          cards.forEach((card) => {
+            card.onclick = () => {
+              cards.forEach((c) => c.classList.remove("active"));
+              card.classList.add("active");
+              selectedDropIdx = Number(card.dataset.dropIndex);
+              const dropsArr = JSON.parse(dropsList.dataset.drops || "[]");
+              if (dropsArr[selectedDropIdx]) {
+                loadChannelsForDrop(dropsArr[selectedDropIdx]);
+              }
+            };
+          });
+          selectedDropIdx = 0;
+          if (cards[0]) {
+            cards[0].classList.add("active");
+            loadChannelsForDrop(drops[0]);
+          }
+          dropsList.dataset.drops = JSON.stringify(drops);
+        }
+        setMessage("Drops cargados.", "success");
+      } catch (err) {
+        dropsList.innerHTML = `<div class='muted'>${err.message}</div>`;
+        setMessage(err.message, "error");
+      } finally {
+        refreshDropsBtn.disabled = false;
+        dropsLoading = false;
+        highlightFarmingCard();
+      }
+    }
+
+    async function loadChannelsForDrop(drop) {
+      try {
+        const res = await callAPI("/api/drops/channels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            gameId: drop.gameId,
+            gameName: drop.gameName || drop.game,
+            gameSlug: drop.gameSlug,
+          }),
+        });
+        const channels = res.channels || [];
+        if (!channels.length) {
+          channelsList.textContent = "Sin canales encontrados para este drop.";
+          channelsList.dataset.channels = "[]";
+          channelsList.dataset.selectedChannel = "";
+          return channels;
+        }
+        channelsList.innerHTML = channels
+          .map(
+            (c, i) => `
+              <div class="channel-card ${i === 0 ? "active" : ""}" data-channel="${c.channel || ""}">
+                <img class="channel-avatar" src="${c.profileImage || ""}" alt="">
+                <div style="flex:1;">
+                  <div class="value">${c.displayName || c.channel || "canal"}</div>
+                  <div class="tiny">${c.title || "Sin titulo"}  ${c.viewers || 0} viewers</div>
+                </div>
+              </div>
+            `
+          )
+          .join("");
+        channelsList.dataset.channels = JSON.stringify(channels);
+        channelsList.dataset.selectedChannel = channels[0]?.channel || "";
+        channelsList.querySelectorAll(".channel-card").forEach((card) => {
+          card.onclick = () => {
+            channelsList.querySelectorAll(".channel-card").forEach((c) => c.classList.remove("active"));
+            card.classList.add("active");
+            channelsList.dataset.selectedChannel = card.dataset.channel || "";
+          };
+        });
+        return channels;
+      } catch (err) {
+        channelsList.textContent = err.message;
+        channelsList.dataset.channels = "[]";
+        channelsList.dataset.selectedChannel = "";
+        return [];
+      }
+    }
+    farmBtn.onclick = async () => {
+      const drops = JSON.parse(dropsList.dataset.drops || "[]");
+      const drop = drops[selectedDropIdx ?? 0] || {};
+      let channel = channelsList.dataset.selectedChannel || "";
+      if (!channel && drop.gameId) {
+        const chans = await loadChannelsForDrop(drop);
+        channel = chans[0]?.channel || "";
+      }
+      if (!channel) {
+        setMessage("No se pudo determinar canal para farmear.", "error");
+        setDropFarmStatus("No hay canal seleccionado para farmear.", "error");
+        return;
+      }
+      farmBtn.classList.add("loading");
+      farmBtn.innerHTML = "<span>Farmear drop</span>";
+      try {
+        if (currentFarm.channel) {
+          // ya farmeando: agregar a cola
+          if (!farmQueue.includes(channel)) {
+            farmQueue.push(channel);
+          }
+          await callAPI("/api/drops/farm/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ queue: farmQueue }),
+          });
+          updateQueueStatus();
+          setDropFarmStatus(`Canal ${channel} agregado a la cola.`, "success");
+        } else {
+          await callAPI("/api/drops/farm/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ channel, queue: farmQueue }),
+          });
+          currentFarm = { dropName: drop.name || "", channel };
+          localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
+          setDropFarmStatus(`Farmeando "${drop.name || ""}" en ${channel}. (stream en servidor)`, "success");
+          highlightFarmingCard();
+          scheduleFarmStatusPoll();
+        }
+      } catch (err) {
+        setDropFarmStatus(err.message, "error");
+      } finally {
+        farmBtn.classList.remove("loading");
+        farmBtn.textContent = "Farmear drop";
+      }
+    };
+
+    stopFarmBtn.onclick = async () => {
+      stopFarmBtn.disabled = true;
+      try {
+        await callAPI("/api/drops/farm/stop", { method: "POST" });
+        currentFarm = { dropName: "", channel: "" };
+        farmQueue = [];
+        localStorage.removeItem(getFarmStorageKey());
+        highlightFarmingCard();
+        updateQueueStatus();
+        setDropFarmStatus("Farmeo detenido.", "success");
+      } catch (err) {
+        setDropFarmStatus(err.message, "error");
+      } finally {
+        stopFarmBtn.disabled = false;
+      }
+    };
+
+    refreshDropsBtn.onclick = refreshDrops;
+
+    embedImage.addEventListener("click", async (e) => {
+      const rect = embedImage.getBoundingClientRect();
+      const vx = parseFloat(embedImage.dataset.vw || "1024");
+      const vy = parseFloat(embedImage.dataset.vh || "576");
+      const x = ((e.clientX - rect.left) / rect.width) * vx;
+      const y = ((e.clientY - rect.top) / rect.height) * vy;
+      try {
+        await callAPI("/api/login/click", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ x, y }),
+        });
+        setMessage(`Click enviado (${x.toFixed(0)}, ${y.toFixed(0)}).`);
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    });
+
+    sendTextBtn.onclick = async () => {
+      const text = typeInput.value || "";
+      if (!text) {
+        setMessage("Escribe texto para enviar.", "error");
+        return;
+      }
+      try {
+        await callAPI("/api/login/type", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        setMessage("Texto enviado.", "success");
+        typeInput.value = "";
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    };
+
+    enterKeyBtn.onclick = () => sendKey("Enter");
+    tabKeyBtn.onclick = () => sendKey("Tab");
+    backspaceKeyBtn.onclick = () => sendKey("Backspace");
+    scrollUpBtn.onclick = () => sendScroll(-600);
+    scrollDownBtn.onclick = () => sendScroll(600);
+    zoomInBtn.onclick = () => sendZoom(0.1);
+    zoomOutBtn.onclick = () => sendZoom(-0.1);
+
+    async function sendKey(key) {
+      try {
+        await callAPI("/api/login/key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key }),
+        });
+        setMessage(`Tecla ${key} enviada.`, "success");
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    async function sendScroll(deltaY) {
+      try {
+        await callAPI("/api/login/scroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deltaY }),
+        });
+        setMessage(`Scroll ${deltaY > 0 ? "abajo" : "arriba"} enviado.`, "success");
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    async function sendZoom(delta) {
+      try {
+        const data = await callAPI("/api/login/zoom", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ delta }),
+        });
+        currentZoom = data.zoom || currentZoom;
+        setMessage(`Zoom ${(currentZoom * 100).toFixed(0)}%`, "success");
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    if (profileToggle && profileMenu) {
+      profileToggle.onclick = () => {
+        profileMenuOpen = !profileMenuOpen;
+        profileMenu.classList.toggle("show", profileMenuOpen);
+      };
+      document.addEventListener("click", (e) => {
+        if (!profileMenu) return;
+        const insideMenu = profileMenu.contains(e.target);
+        const insideToggle = profileToggle && profileToggle.contains(e.target);
+        if (!insideMenu && !insideToggle) {
+          profileMenu.classList.remove("show");
+          profileMenuOpen = false;
+        }
+      });
+    }
+    if (addProfileBtn) {
+      addProfileBtn.onclick = createProfile;
+    }
+    if (newProfileName) {
+      newProfileName.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          createProfile();
+        }
+      });
+    }
+
+    async function initApp() {
+      try {
+        await syncProfilesFromServer();
+        updateQueueStatus();
+        highlightFarmingCard();
+        await refreshStatus();
+        updateToggleLabel();
+        checkFarmStatus();
+        scheduleFarmStatusPoll();
+        refreshDrops();
+        if (!dropsAutoTimer) {
+          dropsAutoTimer = setInterval(() => {
+            refreshDrops();
+          }, 60000);
+        }
+      } catch (err) {
+        setMessage(err.message, "error");
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
