@@ -23,13 +23,21 @@ const ENV_CLIENT_ID = process.env.TW_CLIENT_ID || "kimne78kx3ncx6brgo4mv6wki5h1k
 
 app.use(cors());
 app.use(express.json());
+app.set("trust proxy", 1);
 
-function setAuthCookie(res, username, secret) {
+function isSecure(req) {
+  return Boolean(
+    req.secure ||
+      (req.headers["x-forwarded-proto"] || "").split(",")[0].trim() === "https"
+  );
+}
+
+function setAuthCookie(req, res, username, secret) {
   const token = signToken(username, secret);
   res.cookie(AUTH_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure(req),
     maxAge: TOKEN_TTL_MS,
   });
 }
@@ -66,7 +74,7 @@ app.post("/auth/register", (req, res) => {
   const hash = hashPassword(password, salt);
   const secret = crypto.randomBytes(32).toString("hex");
   saveAuthData({ user: { username: username.trim(), salt, hash }, secret });
-  setAuthCookie(res, username.trim(), secret);
+  setAuthCookie(req, res, username.trim(), secret);
   res.json({ ok: true });
 });
 
@@ -83,7 +91,7 @@ app.post("/auth/login", (req, res) => {
   if (hash !== data.user.hash) {
     return res.status(401).json({ ok: false, error: "Invalid credentials." });
   }
-  setAuthCookie(res, username, ensureAuthSecret(data).secret);
+  setAuthCookie(req, res, username, ensureAuthSecret(data).secret);
   res.json({ ok: true });
 });
 
