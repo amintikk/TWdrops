@@ -3,10 +3,8 @@
 Welcome to **TW Drops**, the scrappy Twitch drops farmer that drives a headless Playwright browser for you. It captures cookies, shows account stats, lists active campaigns, fetches live channels, and farms drops in the background — all from a slick control panel. The codebase is a bit of a beautiful disaster, but *if it works, don’t touch it.*
 
 ![Dashboard overview](drops-pannel.png)
-![Profile switcher & cookies](pannel.png)
 
 ## Why You Might Actually Like This
-- **Embedded browser control**: Click, type, scroll, zoom via the UI; headless Playwright does the heavy lifting.
 - **Cookie capture + stats**: Grab `auth-token`, view Twitch account info (display name, affiliate/partner, created at, bio, avatar).
 - **Drops dashboard**: Active campaigns with progress bars and reward details; auto-fetches live channels for the selected game/drop.
 - **Background farming**: Opens the stream, mutes/plays, queues channels, and keeps running per-profile.
@@ -31,7 +29,6 @@ Pull & run the published image:
 ```bash
 docker run -p 3000:3000 -v twdrops_profile:/app/.twdrops-profile amintikk/twdrops:latest
 ```
-Tags: `latest` (rolling) and `v1` (pinned). Both are multi-arch (amd64/arm64). The volume keeps auth, cookies, and profiles.
 
 ## Auth & Persistence
 - Auth data and cookies live in `.twdrops-profile/` (or the mounted volume in Docker).
@@ -40,12 +37,6 @@ Tags: `latest` (rolling) and `v1` (pinned). Both are multi-arch (amd64/arm64). T
 
 ## Scripts
 - `npm start` — run server (Express + Playwright + static frontend).
-
-## Known Limitations (a.k.a. The “Code Is Horrible” Section)
-- The code is messy, monolithic, and unapologetically pragmatic.
-- Error handling is “log and shrug” in places.
-- Styling is hand-rolled; responsive tweaks exist but aren’t lovingly crafted.
-- Still, remember the sacred rule: **if it works, don’t touch it.**
 
 ## Disclaimer
 - Use at your own risk. This is not affiliated with Twitch.
