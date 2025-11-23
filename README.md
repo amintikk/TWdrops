@@ -29,6 +29,23 @@ Pull & run the published image:
 ```bash
 docker run -p 3000:3000 -v twdrops_profile:/app/.twdrops-profile amintikk/twdrops:latest
 ```
+Or with Docker Compose:
+```yaml
+version: "3.9"
+services:
+  twdrops:
+    image: amintikk/twdrops:latest
+    container_name: twdrops
+    ports:
+      - "3000:3000"
+    volumes:
+      - twdrops_profile:/app/.twdrops-profile
+    restart: unless-stopped
+
+volumes:
+  twdrops_profile:
+```
+Then run: `docker compose up -d`
 
 ## Auth & Persistence
 - Auth data and cookies live in `.twdrops-profile/` (or the mounted volume in Docker).
